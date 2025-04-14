@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --apple-gray: #f5f5f7;
+            --apple-light-gray: #f9f9f9;
+            --apple-blue: #0071e3;
+            --apple-text: #1d1d1f;
+            --sidebar-width: 200px;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--apple-light-gray);
+            color: var(--apple-text);
+            margin: 0;
+            padding: 0;
+        }
+
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--apple-gray);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 2rem;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.05);
+            z-index: 10;
+        }
+
+        .sidebar img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 50%;
+            margin-bottom: 1.5rem;
+            box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar .username {
+            margin-bottom: 2rem;
+            font-size: 1rem;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .sidebar .nav-link {
+            margin: 1rem 0;
+            font-size: 1rem;
+            color: var(--apple-text);
+            text-decoration: none;
+            transition: color 0.2s ease;
+            font-weight: 500;
+            padding: 0.5rem 0;
+            width: 80%;
+            text-align: center;
+        }
+
+        .sidebar .nav-link:hover {
+            color: var(--apple-blue);
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 0;
+        }
+
+        .calendar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.5rem 2rem;
+            background-color: white;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .calendar-title {
+            font-size: 1.5rem;
+            font-weight: 500;
+        }
+
+        .calendar-nav {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .calendar-nav button {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: #555;
+            padding: 0.3rem 0.7rem;
+            border-radius: 4px;
+        }
+
+        .calendar-nav button:hover {
+            background-color: #f0f0f0;
+        }
+
+        .today-button {
+            background-color: var(--apple-blue) !important;
+            color: white !important;
+            padding: 0.3rem 1rem !important;
+            border-radius: 20px !important;
+            font-size: 0.9rem !important;
+            font-weight: 500;
+        }
+
+        .weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            text-align: center;
+            padding: 0.5rem 0;
+            background-color: white;
+            font-weight: 500;
+            color: #666;
+            font-size: 0.8rem;
+        }
+
+        .calendar {
+            flex: 1;
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            grid-template-rows: repeat(6, 1fr);
+            gap: 1px;
+            background-color: #e0e0e0;
+        }
+
+        .day {
+            background-color: white;
+            min-height: 100px;
+            padding: 0.5rem;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .day:hover {
+            background-color: #f8f8f8;
+        }
+
+        .day-number {
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            color: #555;
+            position: absolute;
+            top: 5px;
+            left: 8px;
+        }
+
+        .today {
+            background-color: #f0f7ff;
+        }
+
+        .today .day-number {
+            background-color: var(--apple-blue);
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 500;
+        }
+
+        .other-month {
+            background-color: #f9f9f9;
+        }
+
+        .other-month .day-number {
+            color: #aaa;
+        }
+
+        .event {
+            font-size: 0.8rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 3px;
+            margin-bottom: 0.2rem;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            cursor: pointer;
+            margin-top: 25px;
+        }
+
+        .event-blue {
+            background-color: rgba(0, 113, 227, 0.1);
+            color: var(--apple-blue);
+            border-left: 3px solid var(--apple-blue);
+        }
+
+        .event-green {
+            background-color: rgba(70, 190, 120, 0.1);
+            color: #46be78;
+            border-left: 3px solid #46be78;
+        }
+
+        .event-orange {
+            background-color: rgba(255, 149, 0, 0.1);
+            color: #ff9500;
+            border-left: 3px solid #ff9500;
+        }
+
+        /* Modal styles */
+        .modal-content {
+            border-radius: 10px;
+            border: none;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-header {
+            border-bottom: 1px solid #f0f0f0;
+            background-color: var(--apple-light-gray);
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+        }
+
+        .modal-footer {
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--apple-blue);
+            box-shadow: 0 0 0 0.25rem rgba(0, 113, 227, 0.25);
+        }
+
+        .btn-primary {
+            background-color: var(--apple-blue);
+            border-color: var(--apple-blue);
+        }
+
+        .btn-primary:hover {
+            background-color: #005bbf;
+            border-color: #005bbf;
+        }
+
+        .color-sample {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            margin-right: 5px;
+            vertical-align: middle;
+            border-radius: 3px;
+        }
+
+        .color-blue {
+            background-color: rgba(0, 113, 227, 0.3);
+            border-left: 3px solid var(--apple-blue);
+        }
+
+        .color-green {
+            background-color: rgba(70, 190, 120, 0.3);
+            border-left: 3px solid #46be78;
+        }
+
+        .color-orange {
+            background-color: rgba(255, 149, 0, 0.3);
+            border-left: 3px solid #ff9500;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <img src="https://via.placeholder.com/60" alt="User photo">
+        <div class="username">Account</div>
+
+    </div>
+
+    <div class="main-content">
+        <div class="calendar-header">
+            <div class="calendar-title">{{ month_name }} {{ year }}</div>
+            <div class="calendar-nav">
+                <form id="calendarForm" method="get" action="{% url 'home' %}">
+                    <input type="hidden" id="yearInput" name="year" value="{{ year }}">
+                    <input type="hidden" id="monthInput" name="month" value="{{ month }}">
+                </form>
+                <button class="previous-month" onclick="navigateMonth(-1)">&lt;</button>
+                <button class="today-button" onclick="goToToday()">Today</button>
+                <button class="next-month" onclick="navigateMonth(1)">&gt;</button>
+            </div>
+        </div>
+
+        <div class="weekdays">
+            <div>Sun</div>
+            <div>Mon</div>
+            <div>Tue</div>
+            <div>Wed</div>
+            <div>Thu</div>
+            <div>Fri</div>
+            <div>Sat</div>
+        </div>
+
+        <div class="calendar">
+            {% for day in calendar_days %}
+                <div class="day{% if day.is_today %} today{% endif %}{% if not day.current_month %} other-month{% endif %}"
+                     onclick="openEventModal('{{ day.full_date|date:'Y-m-d' }}')">
+                    <div class="day-number">{{ day.number }}</div>
+                    {% for event in day.events %}
+                        <div class="event {{ event.color }}" onclick="editEvent(event, '{{ event.id }}', '{{ event.title }}', '{{ event.date }}', '{{ event.color }}')">
+                            {{ event.title }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Event Modal -->
+    <div class="modal fade" id="eventModal" tabindex="-1" aria-labelledby="eventModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="eventModalLabel">Add Event</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="eventForm" method="post" action="{% url 'add_event' %}">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        <input type="hidden" id="eventId" name="event_id">
+                        <input type="hidden" id="eventDate" name="date">
+
+                        <div class="mb-3">
+                            <label for="eventTitle" class="form-label">Event Title</label>
+                            <input type="text" class="form-control" id="eventTitle" name="title" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="eventColor" class="form-label">Event Color</label>
+                            <select class="form-select" id="eventColor" name="color">
+                                <option value="event-blue">
+                                    <span class="color-sample color-blue"></span> Blue
+                                </option>
+                                <option value="event-green">
+                                    <span class="color-sample color-green"></span> Green
+                                </option>
+                                <option value="event-orange">
+                                    <span class="color-sample color-orange"></span> Orange
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" id="deleteEventBtn" class="btn btn-danger me-auto d-none" onclick="deleteEvent()">Delete</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let eventModal;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            eventModal = new bootstrap.Modal(document.getElementById('eventModal'));
+        });
+
+        function navigateMonth(direction) {
+            const yearInput = document.getElementById('yearInput');
+            const monthInput = document.getElementById('monthInput');
+
+            let year = parseInt(yearInput.value);
+            let month = parseInt(monthInput.value);
+
+            month += direction;
+
+            if (month < 1) {
+                month = 12;
+                year -= 1;
+            } else if (month > 12) {
+                month = 1;
+                year += 1;
+            }
+
+            yearInput.value = year;
+            monthInput.value = month;
+
+            document.getElementById('calendarForm').submit();
+        }
+
+        function goToToday() {
+            const today = new Date();
+            document.getElementById('yearInput').value = today.getFullYear();
+            document.getElementById('monthInput').value = today.getMonth() + 1;
+            document.getElementById('calendarForm').submit();
+        }
+
+        function openEventModal(date) {
+            document.getElementById('eventModalLabel').textContent = 'Add Event';
+            document.getElementById('eventId').value = '';
+            document.getElementById('eventDate').value = date;
+            document.getElementById('eventTitle').value = '';
+            document.getElementById('eventColor').value = 'event-blue';
+            document.getElementById('deleteEventBtn').classList.add('d-none');
+
+            eventModal.show();
+        }
+
+        function editEvent(e, id, title, date, color) {
+            e.stopPropagation(); // Prevent triggering the day click event
+
+            document.getElementById('eventModalLabel').textContent = 'Edit Event';
+            document.getElementById('eventId').value = id;
+            document.getElementById('eventDate').value = date;
+            document.getElementById('eventTitle').value = title;
+            document.getElementById('eventColor').value = color;
+            document.getElementById('deleteEventBtn').classList.remove('d-none');
+
+            eventModal.show();
+        }
+
+        function deleteEvent() {
+            const eventId = document.getElementById('eventId').value;
+            if (confirm('Are you sure you want to delete this event?')) {
+                window.location.href = "{% url 'delete_event' %}?event_id=" + eventId;
+            }
+        }
+    </script>
+</body>
+</html>

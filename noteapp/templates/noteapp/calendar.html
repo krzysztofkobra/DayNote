@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendar</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --apple-gray: #f5f5f7;
+            --apple-light-gray: #f9f9f9;
+            --apple-blue: #0071e3;
+            --apple-text: #1d1d1f;
+            --sidebar-width: 200px; /* Wider sidebar */
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--apple-light-gray);
+            color: var(--apple-text);
+            margin: 0;
+            padding: 0;
+        }
+
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--apple-gray);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 2rem;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.05);
+            z-index: 10;
+        }
+
+        .sidebar img {
+            width: 60px; /* Slightly larger profile pic */
+            height: 60px;
+            object-fit: cover;
+            border-radius: 50%;
+            margin-bottom: 1.5rem;
+            box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar .username {
+            margin-bottom: 2rem;
+            font-size: 1rem;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .sidebar .nav-link {
+            margin: 1rem 0;
+            font-size: 1rem;
+            color: var(--apple-text);
+            text-decoration: none;
+            transition: color 0.2s ease;
+            font-weight: 500;
+            padding: 0.5rem 0;
+            width: 80%;
+            text-align: center;
+        }
+
+        .sidebar .nav-link:hover {
+            color: var(--apple-blue);
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 0;
+        }
+
+        .calendar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.5rem 2rem;
+            background-color: white;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .calendar-title {
+            font-size: 1.5rem;
+            font-weight: 500;
+        }
+
+        .calendar-nav {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .calendar-nav button {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: #555;
+            padding: 0.3rem 0.7rem;
+            border-radius: 4px;
+        }
+
+        .calendar-nav button:hover {
+            background-color: #f0f0f0;
+        }
+
+        .today-button {
+            background-color: var(--apple-blue) !important;
+            color: white !important;
+            padding: 0.3rem 1rem !important;
+            border-radius: 20px !important;
+            font-size: 0.9rem !important;
+            font-weight: 500;
+        }
+
+        .weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            text-align: center;
+            padding: 0.5rem 0;
+            background-color: white;
+            font-weight: 500;
+            color: #666;
+            font-size: 0.8rem;
+        }
+
+        .calendar {
+            flex: 1;
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            grid-template-rows: repeat(6, 1fr);
+            gap: 1px;
+            background-color: #e0e0e0;
+        }
+
+        .day {
+            background-color: white;
+            min-height: 100px;
+            padding: 0.5rem;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .day-number {
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            color: #555;
+            position: absolute;
+            top: 5px;
+            left: 8px;
+        }
+
+        .today {
+            background-color: #f0f7ff; /* Light blue background for today */
+        }
+
+        .today .day-number {
+            background-color: var(--apple-blue);
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 500;
+        }
+
+        .other-month {
+            background-color: #f9f9f9;
+        }
+
+        .other-month .day-number {
+            color: #aaa;
+        }
+
+        .event {
+            font-size: 0.8rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 3px;
+            margin-bottom: 0.2rem;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            cursor: pointer;
+            margin-top: 25px; /* Make room for day number */
+        }
+
+        .event-blue {
+            background-color: rgba(0, 113, 227, 0.1);
+            color: var(--apple-blue);
+            border-left: 3px solid var(--apple-blue);
+        }
+
+        .event-green {
+            background-color: rgba(70, 190, 120, 0.1);
+            color: #46be78;
+            border-left: 3px solid #46be78;
+        }
+
+        .event-orange {
+            background-color: rgba(255, 149, 0, 0.1);
+            color: #ff9500;
+            border-left: 3px solid #ff9500;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <img src="https://via.placeholder.com/60" alt="User photo">
+        <div class="username">Account</div>
+        <a href="{% url 'notes' %}" class="nav-link">Notatki</a>
+    </div>
+
+    <div class="main-content">
+        <div class="calendar-header">
+            <div class="calendar-title">{{ month_name }} {{ year }}</div>
+            <div class="calendar-nav">
+                <form id="calendarForm" method="get" action="{% url 'calendar' %}">
+                    <input type="hidden" id="yearInput" name="year" value="{{ year }}">
+                    <input type="hidden" id="monthInput" name="month" value="{{ month }}">
+                </form>
+                <button class="previous-month" onclick="navigateMonth(-1)">&lt;</button>
+                <button class="today-button" onclick="goToToday()">Today</button>
+                <button class="next-month" onclick="navigateMonth(1)">&gt;</button>
+            </div>
+        </div>
+
+        <div class="weekdays">
+            <div>Sun</div>
+            <div>Mon</div>
+            <div>Tue</div>
+            <div>Wed</div>
+            <div>Thu</div>
+            <div>Fri</div>
+            <div>Sat</div>
+        </div>
+
+        <div class="calendar">
+            {% for day in calendar_days %}
+                <div class="day{% if day.is_today %} today{% endif %}{% if not day.current_month %} other-month{% endif %}">
+                    <div class="day-number">{{ day.number }}</div>
+                    {% for event in day.events %}
+                        <div class="event {{ event.color_class }}">{{ event.title }}</div>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function navigateMonth(direction) {
+            const yearInput = document.getElementById('yearInput');
+            const monthInput = document.getElementById('monthInput');
+
+            let year = parseInt(yearInput.value);
+            let month = parseInt(monthInput.value);
+
+            month += direction;
+
+            if (month < 1) {
+                month = 12;
+                year -= 1;
+            } else if (month > 12) {
+                month = 1;
+                year += 1;
+            }
+
+            yearInput.value = year;
+            monthInput.value = month;
+
+            document.getElementById('calendarForm').submit();
+        }
+
+        function goToToday() {
+            const today = new Date();
+            document.getElementById('yearInput').value = today.getFullYear();
+            document.getElementById('monthInput').value = today.getMonth() + 1;
+            document.getElementById('calendarForm').submit();
+        }
+    </script>
+</body>
+</html>
