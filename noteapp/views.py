@@ -1,12 +1,12 @@
-from django.shortcuts import render, redirect
-from django.contrib.auth import  authenticate, login, logout
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views import View
+from django.urls import reverse
 from django.contrib.auth.models import User
 from .forms import RegisterForm
+from .models import Event, Note
 import calendar
-from datetime import datetime, timedelta
+from datetime import datetime, date
 from calendar import monthrange
 
 def register_view(request):
@@ -20,7 +20,7 @@ def register_view(request):
             return redirect('home')
     else:
         form = RegisterForm()
-    return render(request, 'accounts/register.html', {'form':form})
+    return render(request, 'accounts/register.html', {'form': form})
 
 def login_view(request):
     error_message = None
@@ -34,36 +34,29 @@ def login_view(request):
             return redirect(next_url)
         else:
             error_message = "Invalid Credentials!"
-    return render(request, 'accounts/login.html', {'error':error_message})
+    return render(request, 'accounts/login.html', {'error': error_message})
 
 def logout_view(request):
     if request.method == "POST":
         logout(request)
         return redirect('login')
     else:
-        return redirect('home')
-
+        return render(request, 'accounts/logout.html')
 
 @login_required
 def calendar_view(request):
-    # Get the requested year and month, or use current date
     today = datetime.now()
     year = int(request.GET.get('year', today.year))
     month = int(request.GET.get('month', today.month))
 
-    # Get month name
     month_name = calendar.month_name[month]
 
-    # Get the number of days in the month
     _, num_days = monthrange(year, month)
 
-    # Determine the first day of the month (0 = Monday, 6 = Sunday in Python's calendar)
     first_day, _ = monthrange(year, month)
 
-    # Adjust to make Sunday = 0 (since our calendar view starts with Sunday)
     first_day = (first_day + 1) % 7
 
-    # Get days from previous month to fill calendar
     if month == 1:
         prev_month_year = year - 1
         prev_month = 12
@@ -73,9 +66,7 @@ def calendar_view(request):
 
     _, prev_month_days = monthrange(prev_month_year, prev_month)
 
-    # Calculate date range for events query
-    start_date = date(prev_month_year, prev_month, prev_month_days - first_day + 1) if first_day > 0 else date(year,
-                                                                                                               month, 1)
+    start_date = date(prev_month_year, prev_month, prev_month_days - first_day + 1) if first_day > 0 else date(year, month, 1)
 
     if month == 12:
         next_month_year = year + 1
@@ -84,11 +75,9 @@ def calendar_view(request):
         next_month_year = year
         next_month = month + 1
 
-    # Calculate remaining days for next month
     remaining_days = 42 - (first_day + num_days)
     end_date = date(next_month_year, next_month, remaining_days) if remaining_days > 0 else date(year, month, num_days)
 
-    # Get all events for the user within this date range
     if request.user.is_authenticated:
         events = Event.objects.filter(
             user=request.user,
@@ -97,7 +86,6 @@ def calendar_view(request):
     else:
         events = []
 
-    # Create a dict for quick event lookup
     event_dict = {}
     for event in events:
         event_date = event.date.strftime('%Y-%m-%d')
@@ -110,10 +98,8 @@ def calendar_view(request):
             'color': event.color
         })
 
-    # Create calendar days
     calendar_days = []
 
-    # Previous month days
     for i in range(first_day):
         day_number = prev_month_days - first_day + i + 1
         full_date = date(prev_month_year, prev_month, day_number)
@@ -127,7 +113,6 @@ def calendar_view(request):
             'events': day_events
         })
 
-    # Current month days
     for i in range(1, num_days + 1):
         full_date = date(year, month, i)
         is_today = (i == today.day and month == today.month and year == today.year)
@@ -141,7 +126,6 @@ def calendar_view(request):
             'events': day_events
         })
 
-    # Next month days to fill the remaining grid
     for i in range(1, remaining_days + 1):
         full_date = date(next_month_year, next_month, i)
         day_events = event_dict.get(full_date.strftime('%Y-%m-%d'), [])
@@ -161,8 +145,7 @@ def calendar_view(request):
         'month': month,
     }
 
-    return render(request, 'home.html', context)
-
+    return render(request, 'noteapp/home.html', context)
 
 @login_required
 def add_event(request):
@@ -172,10 +155,10 @@ def add_event(request):
         date_str = request.POST.get('date')
         color = request.POST.get('color')
 
-        # Convert date string to date object
+
         event_date = datetime.strptime(date_str, '%Y-%m-%d').date()
 
-        if event_id:  # Update existing event
+        if event_id:
             try:
                 event = Event.objects.get(id=event_id, user=request.user)
                 event.title = title
@@ -184,7 +167,7 @@ def add_event(request):
                 event.save()
             except Event.DoesNotExist:
                 pass
-        else:  # Create new event
+        else:
             Event.objects.create(
                 title=title,
                 date=event_date,
@@ -194,7 +177,6 @@ def add_event(request):
 
     # Redirect back to the calendar view
     return redirect(reverse('home'))
-
 
 @login_required
 def delete_event(request):
@@ -209,8 +191,44 @@ def delete_event(request):
 
     return redirect(reverse('home'))
 
-
 @login_required
 def notes_view(request):
-    # Your notes view logic here
-    return render(request, 'notes.html')
+    notes = Note.objects.filter(user=request.user).order_by('-updated_at')
+    return render(request, 'noteapp/notes.html', {'notes': notes})
+
+@login_required
+def add_note(request):
+    if request.method == 'POST':
+        note_id = request.POST.get('note_id')
+        title = request.POST.get('title')
+        content = request.POST.get('content')
+
+        if note_id:
+            try:
+                note = Note.objects.get(id=note_id, user=request.user)
+                note.title = title
+                note.content = content
+                note.save()
+            except Note.DoesNotExist:
+                pass
+        else:
+            Note.objects.create(
+                title=title,
+                content=content,
+                user=request.user
+            )
+
+    return redirect(reverse('notes'))
+
+@login_required
+def delete_note(request):
+    note_id = request.GET.get('note_id')
+
+    if note_id:
+        try:
+            note = Note.objects.get(id=note_id, user=request.user)
+            note.delete()
+        except Note.DoesNotExist:
+            pass
+
+    return redirect(reverse('notes'))

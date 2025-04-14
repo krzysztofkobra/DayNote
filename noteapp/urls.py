@@ -8,5 +8,5 @@ urlpatterns = [
     path('register/', views.register_view, name='register'),
     path('add-event/', views.add_event, name='add_event'),
     path('delete-event/', views.delete_event, name='delete_event'),
-    #path('notes/', views.notes_view, name='notes'),
+    path('notes/', views.notes_view, name='notes'),
 ]
