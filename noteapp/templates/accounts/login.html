@@ -12,6 +12,7 @@
             color: red;
         }
     </style>
+    <script src="https://accounts.google.com/gsi/client" async></script>
 </head>
 <body class="bg-light">
     <div class="container py-5" style="max-width: 400px;">
@@ -28,6 +29,23 @@
                 <input type="password" id="password" name="password" class="form-control" placeholder="Password" required>
             </div>
             <button type="submit" class="btn btn-primary w-100">Login</button>
+
+            <div id="g_id_onload" class="mt-3"
+                data-client_id="308372104322-7fiej93q3a3i4mgrq2b1n5rua41sc0ok.apps.googleusercontent.com"
+                 data-context="signin"
+                 data-ux_mode="popup"
+                 data-login_uri="http://localhost:8000/auth-receiver "
+                 data-auto_prompt="false">
+            </div>
+
+            <div class="g_id_signin" class="mt-3"
+                 data-type="standard"
+                 data-shape="rectangular"
+                 data-theme="filled_black"
+                 data-text="signin_with"
+                 data-size="large"
+                 data-logo_alignment="left">
+            </div>
         </form>
         {% if error %}
             <p class="error mt-3">{{ error }}</p>

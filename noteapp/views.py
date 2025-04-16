@@ -8,6 +8,42 @@ from .models import Event, Note
 import calendar
 from datetime import datetime, date
 from calendar import monthrange
+from google.oauth2 import id_token
+from google.auth.transport import requests
+from django.http import HttpResponse
+import os
+
+def sign_in(request):
+    return render(request, 'accounts/login.html')
+
+def auth_receiver(request):
+    """
+    Google calls this URL after the user has signed in with their Google account.
+    """
+    print('Inside')
+    token = request.POST.get['credential']
+
+    try:
+        user_data = id_token.verify_oauth2_token(
+            token, requests.Request(), os.environ['GOOGLE_OAUTH_CLIENT_ID']
+        )
+    except ValueError:
+        return HttpResponse(status=403)
+
+    name = user_data.get('name')
+    request.session['user_data'] = user_data
+
+    user, created = User.objects.get_or_create(defaults={
+        'first_name': name
+    })
+
+    login(request, user)
+
+    return redirect('home')
+
+def sign_out(request):
+    del request.session['user_data']
+    return redirect('login')
 
 def register_view(request):
     if request.method == "POST":
@@ -42,6 +78,11 @@ def logout_view(request):
         return redirect('login')
     else:
         return render(request, 'accounts/logout.html')
+
+
+@login_required
+def account_view(request):
+    pass
 
 @login_required
 def calendar_view(request):
