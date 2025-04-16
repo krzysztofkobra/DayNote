@@ -3,6 +3,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse
 from django.contrib.auth.models import User
+from django.conf import settings
 from .forms import RegisterForm
 from .models import Event, Note, UserProfile
 import calendar
@@ -23,9 +24,8 @@ def auth_receiver(request):
         try:
             token = request.POST.get('credential')
 
-            load_dotenv()
-            client_id = os.getenv("GOOGLE_CLIENT_ID")
-            
+            client_id = settings.GOOGLE_OAUTH_CLIENT_ID
+
             idinfo = id_token.verify_oauth2_token(token, requests.Request(), client_id)
 
             email = idinfo['email']
