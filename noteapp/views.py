@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.urls import reverse
 from django.contrib.auth.models import User
 from django.conf import settings
-from .forms import RegisterForm
+from .forms import RegisterForm, UserProfileForm
 from .models import Event, Note, UserProfile
 import calendar
 from datetime import datetime, date
@@ -14,10 +14,6 @@ from google.auth.transport import requests
 from django.http import HttpResponse
 import os
 from dotenv import load_dotenv
-
-def sign_in(request):
-    return render(request, 'accounts/login.html')
-
 
 def auth_receiver(request):
     if request.method == 'POST':
@@ -55,7 +51,6 @@ def auth_receiver(request):
                 profile.google_connected = True
                 profile.save()
 
-            # Login the user
             login(request, user)
             return redirect('home')
 
@@ -63,10 +58,6 @@ def auth_receiver(request):
             return HttpResponse('Invalid token', status=403)
 
     return HttpResponse('Method not allowed', status=405)
-
-def sign_out(request):
-    del request.session['user_data']
-    return redirect('login')
 
 def register_view(request):
     if request.method == "POST":
@@ -101,11 +92,6 @@ def logout_view(request):
         return redirect('login')
     else:
         return render(request, 'accounts/logout.html')
-
-
-@login_required
-def account_view(request):
-    pass
 
 @login_required
 def calendar_view(request):

@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+import datetime
 
 class Event(models.Model):
     COLOR_CHOICES = [
@@ -11,6 +12,8 @@ class Event(models.Model):
     title = models.CharField(max_length=100)
     date = models.DateField()
     color = models.CharField(max_length=20, choices=COLOR_CHOICES, default='event-blue')
+    start_time = models.TimeField(default=datetime.time(0, 1))
+    end_time = models.TimeField(default=datetime.time(23, 59))
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='events')
 
     def __str__(self):
@@ -29,7 +32,7 @@ class Note(models.Model):
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     google_connected = models.BooleanField(default=False)
-    avatar = models.ImageField(upload_to='avatars/', default='avatars/default.png')
+    avatar = models.ImageField(upload_to='avatars/', default='avatars/default.jpg')
 
     def __str__(self):
         return f"{self.user.username}'s profile"
