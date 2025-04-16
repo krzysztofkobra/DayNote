@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.urls import reverse
 from django.contrib.auth.models import User
 from .forms import RegisterForm
-from .models import Event, Note
+from .models import Event, Note, UserProfile
 import calendar
 from datetime import datetime, date
 from calendar import monthrange
@@ -12,34 +12,57 @@ from google.oauth2 import id_token
 from google.auth.transport import requests
 from django.http import HttpResponse
 import os
+from dotenv import load_dotenv
 
 def sign_in(request):
     return render(request, 'accounts/login.html')
 
+
 def auth_receiver(request):
-    """
-    Google calls this URL after the user has signed in with their Google account.
-    """
-    print('Inside')
-    token = request.POST.get['credential']
+    if request.method == 'POST':
+        try:
+            token = request.POST.get('credential')
 
-    try:
-        user_data = id_token.verify_oauth2_token(
-            token, requests.Request(), os.environ['GOOGLE_OAUTH_CLIENT_ID']
-        )
-    except ValueError:
-        return HttpResponse(status=403)
+            load_dotenv()
+            client_id = os.getenv("GOOGLE_CLIENT_ID")
+            
+            idinfo = id_token.verify_oauth2_token(token, requests.Request(), client_id)
 
-    name = user_data.get('name')
-    request.session['user_data'] = user_data
+            email = idinfo['email']
+            name = idinfo.get('name', '')
 
-    user, created = User.objects.get_or_create(defaults={
-        'first_name': name
-    })
+            try:
+                user = User.objects.get(email=email)
+            except User.DoesNotExist:
+                username = email.split('@')[0]
+                base_username = username
+                counter = 1
+                while User.objects.filter(username=username).exists():
+                    username = f"{base_username}{counter}"
+                    counter += 1
 
-    login(request, user)
+                user = User.objects.create_user(
+                    username=username,
+                    email=email,
+                    password=None
+                )
 
-    return redirect('home')
+                profile, created = UserProfile.objects.get_or_create(user=user)
+                profile.google_connected = True
+                profile.save()
+            else:
+                profile, created = UserProfile.objects.get_or_create(user=user)
+                profile.google_connected = True
+                profile.save()
+
+            # Login the user
+            login(request, user)
+            return redirect('home')
+
+        except ValueError:
+            return HttpResponse('Invalid token', status=403)
+
+    return HttpResponse('Method not allowed', status=405)
 
 def sign_out(request):
     del request.session['user_data']
@@ -273,3 +296,22 @@ def delete_note(request):
             pass
 
     return redirect(reverse('notes'))
+
+
+@login_required
+def account_view(request):
+    profile, created = UserProfile.objects.get_or_create(user=request.user)
+
+    if request.method == "POST":
+        form = UserProfileForm(request.POST, request.FILES, instance=profile)
+        if form.is_valid():
+            form.save()
+            return redirect('account')
+    else:
+        form = UserProfileForm(instance=profile)
+
+    context = {
+        'form': form,
+        'profile': profile,
+    }
+    return render(request, 'accounts/account.html', context)

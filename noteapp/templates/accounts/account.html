@@ -1,14 +1,107 @@
 {% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Profil użytkownika</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Account</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
+        :root {
+            --apple-gray: #f5f5f7;
+            --apple-light-gray: #f9f9f9;
+            --apple-blue: #0071e3;
+            --apple-text: #1d1d1f;
+            --sidebar-width: 200px;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--apple-light-gray);
+            color: var(--apple-text);
+            margin: 0;
+            padding: 0;
+        }
+
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--apple-gray);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 2rem;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.05);
+            z-index: 10;
+            height: 100vh;
+        }
+
+        .sidebar img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 50%;
+            margin-bottom: 1.5rem;
+            box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar .username {
+            margin-bottom: 2rem;
+            font-size: 1rem;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .sidebar .nav-link {
+            margin: 1rem 0;
+            font-size: 1rem;
+            color: var(--apple-text);
+            text-decoration: none;
+            transition: color 0.2s ease;
+            font-weight: 500;
+            padding: 0.5rem 0;
+            width: 80%;
+            text-align: center;
+        }
+
+        .sidebar .nav-link:hover {
+            color: var(--apple-blue);
+        }
+
+        .sidebar .nav-link.active {
+            color: var(--apple-blue);
+            font-weight: 600;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+        }
+
+        .account-container {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .account-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 1rem;
+        }
+
         .avatar-upload {
             position: relative;
             width: 120px;
             height: 120px;
-            margin-bottom: 1rem;
+            margin: 0 auto 2rem;
         }
 
         .avatar-upload img {
@@ -17,31 +110,163 @@
             object-fit: cover;
             border-radius: 50%;
             cursor: pointer;
-            border: 2px solid #ccc;
+            border: 2px solid #ddd;
+            transition: border-color 0.2s;
+        }
+
+        .avatar-upload img:hover {
+            border-color: var(--apple-blue);
         }
 
         .avatar-upload input {
             display: none;
         }
+
+        .account-form {
+            margin-bottom: 2rem;
+        }
+
+        .account-info {
+            margin-bottom: 2rem;
+        }
+
+        .account-info h3 {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            font-weight: 500;
+        }
+
+        .info-item {
+            display: flex;
+            margin-bottom: 0.5rem;
+        }
+
+        .info-label {
+            font-weight: 500;
+            width: 120px;
+        }
+
+        .info-value {
+            color: #555;
+        }
+
+        .btn-primary {
+            background-color: var(--apple-blue);
+            border-color: var(--apple-blue);
+            padding: 0.5rem 1.5rem;
+            border-radius: 20px;
+        }
+
+        .btn-primary:hover {
+            background-color: #005bbf;
+            border-color: #005bbf;
+        }
+
+        .btn-danger {
+            background-color: #ff3b30;
+            border-color: #ff3b30;
+            padding: 0.5rem 1.5rem;
+            border-radius: 20px;
+        }
+
+        .btn-danger:hover {
+            background-color: #e0352b;
+            border-color: #e0352b;
+        }
+
+        .google-connected {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            background-color: #f1f5f9;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            color: #333;
+            margin-left: 10px;
+        }
+
+        .google-connected svg {
+            margin-right: 5px;
+        }
+
+        .actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid #eee;
+        }
     </style>
 </head>
 <body>
-    <div class="account-container">
-        <h1>Twój profil</h1>
+    <div class="sidebar">
+        <img src="{{ profile.avatar.url }}" alt="User photo" onerror="this.src='https://via.placeholder.com/60'">
+        <div class="username">{{ user.username }}</div>
+        <a href="{% url 'home' %}" class="nav-link">Calendar</a>
+        <a href="{% url 'notes' %}" class="nav-link">Notes</a>
+        <a href="{% url 'account' %}" class="nav-link active">Account</a>
+        <a href="{% url 'logout' %}" class="nav-link">Logout</a>
+    </div>
 
-        <form method="POST" enctype="multipart/form-data">
-            {% csrf_token %}
-            <div class="avatar-upload">
-                <label for="id_avatar">
-                    <img src="{{ profile.avatar.url }}" alt="Avatar" id="avatar-preview">
-                </label>
-                {{ form.avatar }}
+    <div class="main-content">
+        <div class="account-container">
+            <div class="account-header">
+                <h1>My Account</h1>
             </div>
 
-            <button type="submit">Save</button>
-        </form>
+            <div class="account-form">
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="avatar-upload">
+                        <label for="id_avatar">
+                            <img src="{{ profile.avatar.url }}" alt="Avatar" id="avatar-preview" onerror="this.src='https://via.placeholder.com/120'">
+                        </label>
+                        {{ form.avatar }}
+                    </div>
+                    <div class="text-center mb-4">
+                        <small class="text-muted">Click on the avatar to change your profile picture</small>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </form>
+            </div>
 
-        <a href="{% url 'logout' %}">Logout</a>
+            <div class="account-info">
+                <h3>Account Information</h3>
+                <div class="info-item">
+                    <div class="info-label">Username:</div>
+                    <div class="info-value">{{ user.username }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Email:</div>
+                    <div class="info-value">{{ user.email|default:"Not provided" }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Joined:</div>
+                    <div class="info-value">{{ user.date_joined|date:"F j, Y" }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Google:</div>
+                    <div class="info-value">
+                        {% if profile.google_connected %}
+                            <div class="google-connected">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M15.545 6.558a9.42 9.42 0 0 1 .139 1.626c0 2.434-.87 4.492-2.384 5.885h.002C11.978 15.292 10.158 16 8 16A8 8 0 1 1 8 0a7.689 7.689 0 0 1 5.352 2.082l-2.284 2.284A4.347 4.347 0 0 0 8 3.166c-2.087 0-3.86 1.408-4.492 3.304a4.792 4.792 0 0 0 0 3.063h.003c.635 1.893 2.405 3.301 4.492 3.301 1.078 0 2.004-.276 2.722-.764h-.003a3.702 3.702 0 0 0 1.599-2.431H8v-3.08h7.545z"/>
+                                </svg>
+                                Connected
+                            </div>
+                        {% else %}
+                            Not connected
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="actions">
+                <a href="{% url 'logout' %}" class="btn btn-danger">Logout</a>
+            </div>
+        </div>
     </div>
 
     <script>
