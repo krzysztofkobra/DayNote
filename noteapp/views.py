@@ -6,7 +6,7 @@ from django.urls import reverse
 from django.contrib.auth.models import User
 from django.conf import settings
 from .forms import RegisterForm, UserProfileForm
-from .models import Event, Note, UserProfile
+from .models import Event, Note, UserProfile, NoteCategory
 import calendar
 from datetime import datetime, date
 from calendar import monthrange
@@ -246,7 +246,8 @@ def delete_event(request):
 @login_required
 def notes_view(request):
     notes = Note.objects.filter(user=request.user).order_by('-updated_at')
-    return render(request, 'noteapp/notes.html', {'notes': notes})
+    categories = NoteCategory.objects.filter(user=request.user)
+    return render(request, 'noteapp/notes.html', {'notes': notes, 'categories': categories})
 
 @login_required
 def add_note(request):
@@ -254,12 +255,21 @@ def add_note(request):
         note_id = request.POST.get('note_id')
         title = request.POST.get('title')
         content = request.POST.get('content')
+        category_id = request.POST.get('category')
+        new_category_name = request.POST.get('new_category_name')
+        new_category_color = request.POST.get('new_category_color')
+
+        if category_id == 'new' and new_category_name:
+            category = NoteCategory.objects.create(name=new_category_name, color=new_category_color, user=request.user)
+        else:
+            category = NoteCategory.objects.get(id=category_id) if category_id else None
 
         if note_id:
             try:
                 note = Note.objects.get(id=note_id, user=request.user)
                 note.title = title
                 note.content = content
+                note.category = category
                 note.save()
             except Note.DoesNotExist:
                 pass
@@ -267,6 +277,7 @@ def add_note(request):
             Note.objects.create(
                 title=title,
                 content=content,
+                category=category,
                 user=request.user
             )
 

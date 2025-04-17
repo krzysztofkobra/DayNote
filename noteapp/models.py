@@ -19,12 +19,24 @@ class Event(models.Model):
     def __str__(self):
         return f"{self.title} on {self.date}"
 
+class NoteCategory(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    name = models.CharField(max_length=100, unique=True)
+    color = models.CharField(max_length=7, default="#FFFFFF")  # HEX
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        unique_together = ('user', 'name')
+
 class Note(models.Model):
     title = models.CharField(max_length=200)
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notes')
+    category = models.ForeignKey(NoteCategory, on_delete=models.SET_NULL, null=True, blank=True, default=None, related_name='notes')
 
     def __str__(self):
         return self.title

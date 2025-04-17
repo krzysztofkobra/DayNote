@@ -23,7 +23,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     eventModal = new bootstrap.Modal(document.getElementById('eventModal'));
 
-    // Create the alert modal dynamically
     const alertModalHTML = `
         <div class="modal fade" id="alertModal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">

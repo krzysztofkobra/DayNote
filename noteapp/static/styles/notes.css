@@ -16,53 +16,61 @@
             padding: 0;
         }
 
-        .sidebar {
-            width: var(--sidebar-width);
-            background-color: var(--apple-gray);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding-top: 2rem;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.05);
-            z-index: 10;
-        }
+.sidebar {
+    width: var(--sidebar-width);
+    background-color: var(--apple-gray);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 2rem;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.05);
+    z-index: 10;
+}
 
-        .sidebar img {
-            width: 60px;
-            height: 60px;
-            object-fit: cover;
-            border-radius: 50%;
-            margin-bottom: 1.5rem;
-            box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
-        }
+.sidebar img {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 50%;
+    margin-bottom: 1.5rem;
+    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
+}
 
-        .sidebar .username {
-            margin-bottom: 2rem;
-            font-size: 1rem;
-            color: #555;
-            font-weight: 500;
-        }
+.sidebar .username {
+    margin-bottom: 2rem;
+    font-size: 1rem;
+    color: #555;
+    font-weight: 500;
+}
 
-        .sidebar .nav-link {
-            margin: 1rem 0;
-            font-size: 1rem;
-            color: var(--apple-text);
-            text-decoration: none;
-            transition: color 0.2s ease;
-            font-weight: 500;
-            padding: 0.5rem 0;
-            width: 80%;
-            text-align: center;
-        }
+.sidebar .nav-link {
+    margin: 1rem 0;
+    font-size: 1rem;
+    color: var(--apple-text);
+    text-decoration: none;
+    transition: color 0.2s ease;
+    font-weight: 500;
+    padding: 0.5rem 0;
+    width: 80%;
+    text-align: center;
+}
 
-        .sidebar .nav-link:hover {
-            color: var(--apple-blue);
-        }
+.account {
+    text-align: center;
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+    width: 100%;
+}
 
-        .sidebar .nav-link.active {
-            color: var(--apple-blue);
-            font-weight: 600;
-        }
+.sidebar .nav-link:hover {
+    color: var(--apple-blue);
+}
+
+.sidebar .nav-link.active {
+    color: var(--apple-blue);
+    font-weight: 600;
+}
 
         .main-content {
             flex: 1;
@@ -201,3 +209,4 @@
             font-size: 1.1rem;
             margin-bottom: 1.5rem;
         }
+

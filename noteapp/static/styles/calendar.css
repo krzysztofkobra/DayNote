@@ -59,6 +59,11 @@ body {
     color: var(--apple-blue);
 }
 
+.sidebar .nav-link.active {
+    color: var(--apple-blue);
+    font-weight: 600;
+}
+
 .main-content {
     flex: 1;
     display: flex;
@@ -207,7 +212,6 @@ body {
     border-left: 3px solid #ff9500;
 }
 
-/* Modal styles */
 .modal-content {
     border-radius: 10px;
     border: none;

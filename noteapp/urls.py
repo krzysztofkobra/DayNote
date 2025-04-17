@@ -11,4 +11,6 @@ urlpatterns = [
     path('notes/', views.notes_view, name='notes'),
     path('auth-receiver/', views.auth_receiver, name='auth_receiver'),
     path('accounts/profile/', views.account_view, name='account'),
+    path('notes/add_note/', views.add_note, name='add_note'),
+    path('notes/delete_note/', views.delete_note, name='delete_note'),
 ]
