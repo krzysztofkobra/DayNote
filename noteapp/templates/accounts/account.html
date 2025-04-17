@@ -196,12 +196,22 @@
             padding-top: 1rem;
             border-top: 1px solid #eee;
         }
+
+        .account {
+            text-align: center;
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 1rem;
+            margin-bottom: 1rem;
+            width: 100%;
+        }
     </style>
 </head>
 <body>
     <div class="sidebar">
-        <img src="{{ profile.avatar.url }}" alt="User photo" onerror="this.src='https://via.placeholder.com/60'">
-        <div class="username">{{ user.username }}</div>
+        <div class="account">
+            <img src="{{ request.user.profile.avatar.url }}" alt="User photo" onerror="this.src='https://via.placeholder.com/60'">
+            <div class="username">{{ user.username }}</div>
+        </div>
         <a href="{% url 'home' %}" class="nav-link">Calendar</a>
         <a href="{% url 'notes' %}" class="nav-link">Notes</a>
         <a href="{% url 'account' %}" class="nav-link active">Account</a>
