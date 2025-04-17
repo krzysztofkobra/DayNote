@@ -13,8 +13,8 @@
         <div class="account">
             <a href="{% url 'account' %}">
                 <img src="{{ request.user.profile.avatar.url }}" alt="User photo" onerror="this.src='https://via.placeholder.com/60'">
+                <div class="username">{{ user.username }}</div>
             </a>
-            <div class="username">{{ user.username }}</div>
         </div>
         <a href="{% url 'home' %}" class="nav-link">Calendar</a>
         <a href="{% url 'notes' %}" class="nav-link active">Notes</a>
@@ -27,18 +27,27 @@
         </div>
 
         <div class="notes-container">
+            <script type="text/javascript">
+                var deleteNoteUrl = "{% url 'delete_note' %}";
+                var deleteCategoryUrl = "{% url 'delete_category' %}";
+                var removeCategoryFromNoteUrl = "{% url 'remove_category_from_note' %}";
+            </script>
+
             {% if notes %}
                 {% for note in notes %}
                     <div class="note-card">
                         <h3>{{ note.title }}</h3>
+                        {% if note.category %}
+                        <div class="note-category" style="background-color: {{ note.category.color }}">
+                            {{ note.category.name }}
+                            <button type="button" class="category-delete-btn" onclick="window.location.href='{% url 'remove_category_from_note' %}?note_id={{ note.id }}'" title="Remove category from this note">×</button>
+                        </div>
+                        {% endif %}
                         <p>{{ note.content }}</p>
                         <div class="date">Last updated: {{ note.updated_at|date:"F j, Y, g:i a" }}</div>
                         <div class="note-actions">
-                            <button class="edit-btn" onclick="editNote('{{ note.id }}', '{{ note.title }}', '{{ note.content }}', '{{ note.category.id }}')">Edit</button>
+                            <button class="edit-btn" onclick="editNote('{{ note.id }}', '{{ note.title }}', '{{ note.content }}', '{{ note.category.id|default:'' }}', '{{ note.category.color|default:'' }}')">Edit</button>
                             <button class="delete-btn" onclick="deleteNote('{{ note.id }}')">Delete</button>
-                            <script type="text/javascript">
-                                var deleteNoteUrl = "{% url 'delete_note' %}";
-                            </script>
                         </div>
                     </div>
                 {% endfor %}
@@ -70,25 +79,35 @@
                         </div>
 
                         <div class="mb-3">
-                        <label for="noteCategory" class="form-label">Category</label>
-                        <select class="form-select" id="noteCategory" name="category" required onchange="checkNewCategory(this)">
-                            <option value="" disabled selected>Select a category</option>
-                            {% for category in categories %}
-                                <option value="{{ category.id }}">{{ category.name }}</option>
-                            {% endfor %}
-                            <option value="new">+ Create new category</option>
-                        </select>
-                        <div id="newCategoryFields" class="mt-3 d-none">
-                            <div class="mb-3">
-                                <label for="newCategoryName" class="form-label">New Category Name</label>
-                                <input type="text" class="form-control" id="newCategoryName" name="new_category_name">
+
+                            <label for="noteCategory" class="form-label">Category</label>
+
+                            <div class="category-select-container">
+
+                                <select class="form-select" id="noteCategory" name="category" onchange="checkNewCategory(this)" style="background-color: #000000">
+                                    <option value="">No category</option>
+                                    {% for category in categories %}
+                                        <option value="{{ category.id }}" data-color="{{ category.color }}" style="background-color: {{ category.color }}">
+                                            {{ category.name }}
+                                        </option>
+                                    {% endfor %}
+                                    <option value="new">+ Create new category</option>
+                                </select>
+                                <button type="button" id="clearCategoryBtn" class="clear-category-btn" onclick="clearCategory()" title="Remove category">×</button>
+
                             </div>
-                            <div class="mb-3">
-                                <label for="newCategoryColor" class="form-label">Color</label>
-                                <input type="color" class="form-control form-control-color" id="newCategoryColor" name="new_category_color" value="#ff0000">
+
+                            <div id="newCategoryFields" class="mt-3 d-none">
+                                <div class="mb-3">
+                                    <label for="newCategoryName" class="form-label">New Category Name</label>
+                                    <input type="text" class="form-control" id="newCategoryName" name="new_category_name">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="newCategoryColor" class="form-label">Color</label>
+                                    <input type="color" class="form-control form-control-color" id="newCategoryColor" name="new_category_color" value="#ff0000">
+                                </div>
                             </div>
                         </div>
-                    </div>
 
                         <div class="mb-3">
                             <label for="noteContent" class="form-label">Content</label>

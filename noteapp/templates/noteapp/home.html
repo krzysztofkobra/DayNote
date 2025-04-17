@@ -14,8 +14,8 @@
         <div class="account">
             <a href="{% url 'account' %}">
                 <img src="{{ request.user.profile.avatar.url }}" alt="User photo" onerror="this.src='https://via.placeholder.com/60'">
+                <div class="username">{{ user.username }}</div>
             </a>
-            <div class="username">{{ user.username }}</div>
         </div>
         <a href="{% url 'home' %}" class="nav-link active">Calendar</a>
         <a href="{% url 'notes' %}" class="nav-link">Notes</a>

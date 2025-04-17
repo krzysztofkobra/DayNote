@@ -13,4 +13,6 @@ urlpatterns = [
     path('accounts/profile/', views.account_view, name='account'),
     path('notes/add_note/', views.add_note, name='add_note'),
     path('notes/delete_note/', views.delete_note, name='delete_note'),
+    path('notes/delete_category/', views.delete_category, name='delete_category'),
+    path('notes/remove_category_from_note/', views.remove_category_from_note, name='remove_category_from_note'),
 ]

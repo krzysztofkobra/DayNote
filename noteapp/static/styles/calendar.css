@@ -43,6 +43,10 @@ body {
     font-weight: 500;
 }
 
+.sidebar .username:hover {
+            color: var(--apple-blue);
+        }
+
 .sidebar .nav-link {
     margin: 1rem 0;
     font-size: 1rem;
@@ -274,4 +278,8 @@ body {
     padding-bottom: 1rem;
     margin-bottom: 1rem;
     width: 100%;
+}
+
+a {
+    text-decoration: none;
 }

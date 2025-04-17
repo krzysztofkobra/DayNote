@@ -2,6 +2,19 @@ let currentNoteId;
 
 document.addEventListener('DOMContentLoaded', function() {
     noteModal = new bootstrap.Modal(document.getElementById('noteModal'));
+    const categorySelect = document.getElementById('noteCategory');
+
+    if (categorySelect) {
+        categorySelect.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            if (selectedOption && selectedOption.dataset.color && this.value !== 'new') {
+                this.style.backgroundColor = selectedOption.dataset.color;
+            } else {
+                this.style.backgroundColor = "";
+            }
+            checkNewCategory(this);
+        });
+    }
 });
 
 function editNote(id, title, content, categoryId, categoryColor) {
@@ -15,20 +28,20 @@ function editNote(id, title, content, categoryId, categoryColor) {
     const select = document.getElementById('noteCategory');
     select.value = categoryId || '';
 
-    const selectedOption = select.querySelector(`option[value="${categoryId}"]`);
-    if (selectedOption && selectedOption.dataset.color) {
-        select.style.backgroundColor = selectedOption.dataset.color;
+    if (categoryId && categoryColor) {
+        select.style.backgroundColor = categoryColor;
     } else {
         select.style.backgroundColor = "";
     }
 
-    checkNewCategory(select);
+    const clearBtn = document.getElementById('clearCategoryBtn');
+    clearBtn.style.display = categoryId ? 'block' : 'none';
 
+    checkNewCategory(select);
     noteModal.show();
 }
 
 function deleteNote(id) {
-    var deleteNoteUrl = "{% url 'delete_note' %}";
     if (confirm('Are you sure you want to delete this note?')) {
         window.location.href = deleteNoteUrl + "?note_id=" + id;
     }
@@ -36,7 +49,47 @@ function deleteNote(id) {
 
 function confirmDeleteNote() {
     if (confirm('Are you sure you want to delete this note?')) {
-        window.location.href = "{% url 'delete_note' %}?note_id=" + currentNoteId;
+        window.location.href = deleteNoteUrl + "?note_id=" + currentNoteId;
+    }
+}
+
+function deleteCategory(categoryId) {
+    if (confirm('Are you sure you want to delete this category? All notes in this category will be moved to Uncategorized.')) {
+        window.location.href = deleteCategoryUrl + "?category_id=" + categoryId;
+    }
+}
+
+function clearCategory() {
+    const select = document.getElementById('noteCategory');
+    select.value = "";
+    select.style.backgroundColor = "";
+}
+
+function removeCategoryFromNote(noteId) {
+    if (confirm('Remove category from this note?')) {
+        window.location.href = removeCategoryFromNoteUrl + "?note_id=" + noteId;
+    }
+}
+
+function checkNewCategory(select) {
+    const newCategoryFields = document.getElementById('newCategoryFields');
+    const clearBtn = document.getElementById('clearCategoryBtn');
+
+    if (select.value === 'new') {
+        newCategoryFields.classList.remove('d-none');
+        clearBtn.style.display = 'none';
+    } else {
+        newCategoryFields.classList.add('d-none');
+        clearBtn.style.display = select.value ? 'block' : 'none';
+    }
+
+    if (select.value && select.value !== 'new') {
+        const selectedOption = select.options[select.selectedIndex];
+        if (selectedOption && selectedOption.dataset.color) {
+            select.style.backgroundColor = selectedOption.dataset.color;
+        }
+    } else {
+        select.style.backgroundColor = "";
     }
 }
 
@@ -49,6 +102,7 @@ noteModal.addEventListener('hidden.bs.modal', function () {
     categorySelect.style.backgroundColor = "";
     const newCategoryFields = document.getElementById('newCategoryFields');
     newCategoryFields.classList.add('d-none');
+    document.getElementById('clearCategoryBtn').style.display = 'none';
 });
 
 var cancelButton = document.querySelector('[data-bs-dismiss="modal"]');
@@ -60,13 +114,5 @@ cancelButton.addEventListener('click', function () {
     categorySelect.style.backgroundColor = "";
     const newCategoryFields = document.getElementById('newCategoryFields');
     newCategoryFields.classList.add('d-none');
+    document.getElementById('clearCategoryBtn').style.display = 'none';
 });
-
-function checkNewCategory(select) {
-    const newCategoryFields = document.getElementById('newCategoryFields');
-    if (select.value === 'new') {
-        newCategoryFields.classList.remove('d-none');
-    } else {
-        newCategoryFields.classList.add('d-none');
-    }
-}

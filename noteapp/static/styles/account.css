@@ -40,8 +40,12 @@
         .sidebar .username {
             margin-bottom: 2rem;
             font-size: 1rem;
-            color: #555;
-            font-weight: 500;
+            font-weight: 600;
+            color: var(--apple-blue);
+        }
+
+        .sidebar .username:hover {
+            color: var(--apple-blue);
         }
 
         .sidebar .nav-link {
@@ -192,10 +196,14 @@
             border-top: 1px solid #eee;
         }
 
-        .account {
-            text-align: center;
-            border-bottom: 1px solid #e0e0e0;
-            padding-bottom: 1rem;
-            margin-bottom: 1rem;
-            width: 100%;
-        }
+.account {
+    text-align: center;
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+    width: 100%;
+    }
+
+a {
+    text-decoration: none;
+}

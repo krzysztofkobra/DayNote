@@ -314,3 +314,35 @@ def account_view(request):
         'profile': profile,
     }
     return render(request, 'accounts/account.html', context)
+
+
+@login_required
+def delete_category(request):
+    category_id = request.GET.get('category_id')
+
+    if category_id:
+        try:
+            category = NoteCategory.objects.get(id=category_id, user=request.user)
+
+            Note.objects.filter(category=category, user=request.user).update(category=None)
+
+            category.delete()
+        except NoteCategory.DoesNotExist:
+            pass
+
+    return redirect(reverse('notes'))
+
+
+@login_required
+def remove_category_from_note(request):
+    note_id = request.GET.get('note_id')
+
+    if note_id:
+        try:
+            note = Note.objects.get(id=note_id, user=request.user)
+            note.category = None
+            note.save()
+        except Note.DoesNotExist:
+            pass
+
+    return redirect(reverse('notes'))

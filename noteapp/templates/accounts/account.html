@@ -11,13 +11,13 @@
 <body>
     <div class="sidebar">
         <div class="account">
-            <img src="{{ request.user.profile.avatar.url }}" alt="User photo" onerror="this.src='https://via.placeholder.com/60'">
-            <div class="username">{{ user.username }}</div>
+            <a href="{% url 'account' %}">
+                <img src="{{ request.user.profile.avatar.url }}" alt="User photo" onerror="this.src='https://via.placeholder.com/60'">
+                <div class="username">{{ user.username }}</div>
+            </a>
         </div>
         <a href="{% url 'home' %}" class="nav-link">Calendar</a>
         <a href="{% url 'notes' %}" class="nav-link">Notes</a>
-        <a href="{% url 'account' %}" class="nav-link active">Account</a>
-        <a href="{% url 'logout' %}" class="nav-link">Logout</a>
     </div>
 
     <div class="main-content">

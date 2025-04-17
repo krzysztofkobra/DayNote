@@ -43,6 +43,10 @@
     font-weight: 500;
 }
 
+.sidebar .username:hover {
+            color: var(--apple-blue);
+        }
+
 .sidebar .nav-link {
     margin: 1rem 0;
     font-size: 1rem;
@@ -209,4 +213,40 @@
             font-size: 1.1rem;
             margin-bottom: 1.5rem;
         }
+.category-select-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.clear-category-btn {
+    position: absolute;
+    right: 35px; /* Position it inside the select, but before the dropdown arrow */
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 0;
+    color: #666;
+    z-index: 5;
+}
+
+.clear-category-btn:hover {
+    color: #333;
+}
+
+/* Display category color and name on notes */
+.note-category {
+    display: inline-block;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    margin-bottom: 0.5rem;
+    color: white;
+}
+
+a {
+    text-decoration: none;
+}
 
