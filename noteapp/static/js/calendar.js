@@ -135,7 +135,25 @@ function editEvent(e, id, title, date, color, startTime, endTime) {
 
 function deleteEvent() {
     const eventId = document.getElementById('eventId').value;
-    if (confirm('Are you sure you want to delete this event?')) {
-        window.location.href = deleteEventUrl + "?event_id=" + eventId;
-    }
+
+    Swal.fire({
+        title: 'Are you sure?',
+        text: 'Do you really want to delete this event?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, delete it!',
+        cancelButtonText: 'Cancel',
+        showClass: {
+            popup: ''
+        },
+        hideClass: {
+            popup: ''
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = deleteEventUrl + "?event_id=" + eventId;
+        }
+    });
 }
