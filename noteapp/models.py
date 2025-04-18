@@ -22,7 +22,7 @@ class Event(models.Model):
 class NoteCategory(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=100, unique=True)
-    color = models.CharField(max_length=7, default="#FFFFFF")  # HEX
+    color = models.CharField(max_length=7, default="#000000")  # HEX
 
     def __str__(self):
         return self.name
