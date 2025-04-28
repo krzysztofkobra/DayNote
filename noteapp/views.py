@@ -317,6 +317,15 @@ def account_view(request):
 
 
 @login_required
+def create_category(request):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        color = request.POST.get('color')
+        if name and color:
+            NoteCategory.objects.create(name=name, color=color, user=request.user)
+    return redirect(reverse('notes'))
+
+@login_required
 def delete_category(request):
     category_id = request.GET.get('category_id')
 
@@ -346,3 +355,7 @@ def remove_category_from_note(request):
             pass
 
     return redirect(reverse('notes'))
+
+@login_required
+def settings_view(request):
+    return redirect('../accounts/profile/')

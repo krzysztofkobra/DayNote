@@ -15,14 +15,22 @@ class Event(models.Model):
     start_time = models.TimeField(default=datetime.time(0, 1))
     end_time = models.TimeField(default=datetime.time(23, 59))
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='events')
+    google_calendar_id = models.CharField(max_length=255, null=True, blank=True)
+    sync_with_google = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.title} on {self.date}"
 
+    def get_start_datetime(self):
+        return datetime.datetime.combine(self.date, self.start_time)
+
+    def get_end_datetime(self):
+        return datetime.datetime.combine(self.date, self.end_time)
+
 class NoteCategory(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=100, unique=True)
-    color = models.CharField(max_length=7, default="#000000")  # HEX
+    color = models.CharField(max_length=7, default="#000000")
 
     def __str__(self):
         return self.name

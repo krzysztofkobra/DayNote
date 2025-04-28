@@ -56,7 +56,6 @@ function editNote(id, title, content, categoryId, categoryColor, categoryName) {
     const select = document.getElementById('noteCategory');
     select.value = categoryId || '';
 
-    // Update the color box
     const colorBox = document.getElementById('categoryColorBox');
     if (categoryId && categoryColor) {
         colorBox.style.backgroundColor = categoryColor;
@@ -66,7 +65,6 @@ function editNote(id, title, content, categoryId, categoryColor, categoryName) {
         colorBox.style.display = 'none';
     }
 
-    // Handle new category fields
     if (select.value === 'new') {
         document.getElementById('newCategoryFields').classList.remove('d-none');
     } else {
