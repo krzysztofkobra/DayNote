@@ -15,6 +15,8 @@ class Event(models.Model):
     start_time = models.TimeField(default=datetime.time(0, 1))
     end_time = models.TimeField(default=datetime.time(23, 59))
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='events')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     google_calendar_id = models.CharField(max_length=255, null=True, blank=True)
     sync_with_google = models.BooleanField(default=False)
 

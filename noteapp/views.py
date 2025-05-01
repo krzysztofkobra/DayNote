@@ -227,7 +227,6 @@ def add_event(request):
                 user=request.user
             )
 
-    # Redirect back to the calendar view
     return redirect(reverse('home'))
 
 @login_required
@@ -358,4 +357,4 @@ def remove_category_from_note(request):
 
 @login_required
 def settings_view(request):
-    return redirect('../accounts/profile/')
+    return render(request, 'noteapp/settings.html')
