@@ -5,7 +5,7 @@
 *.db
 *.sqlite3
 .idea
-.env
+../stara wersja/DayNote/.env
 __pycache__/
 db.sqlite3
 settings.py

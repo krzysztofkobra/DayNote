@@ -13,8 +13,8 @@ from calendar import monthrange
 from google.oauth2 import id_token
 from google.auth.transport import requests
 from django.http import HttpResponse
-import os
-from dotenv import load_dotenv
+from .services import categorize_note_content
+import json
 
 @csrf_exempt
 def auth_receiver(request):
@@ -259,26 +259,40 @@ def add_note(request):
         new_category_color = request.POST.get('new_category_color')
 
         if category_id == 'new' and new_category_name:
-            category = NoteCategory.objects.create(name=new_category_name, color=new_category_color, user=request.user)
+            category = NoteCategory.objects.create(
+                name=new_category_name,
+                color=new_category_color,
+                user=request.user
+            )
+        elif category_id:
+            category = NoteCategory.objects.get(id=category_id)
         else:
-            category = NoteCategory.objects.get(id=category_id) if category_id else None
+            category = None
 
         if note_id:
-            try:
-                note = Note.objects.get(id=note_id, user=request.user)
-                note.title = title
-                note.content = content
-                note.category = category
-                note.save()
-            except Note.DoesNotExist:
-                pass
+            note = get_object_or_404(Note, id=note_id, user=request.user)
+            note.title = title
+            note.content = content
+            note.category = category
+            note.save()
         else:
-            Note.objects.create(
+            note = Note.objects.create(
                 title=title,
                 content=content,
                 category=category,
                 user=request.user
             )
+
+        if category is None:
+            result = categorize_note_content(content)
+            cat_name = result.get('category', 'Uncategorized')
+            cat_obj, _ = NoteCategory.objects.get_or_create(
+                name=cat_name,
+                user=request.user,
+                defaults={'color': '#cccccc'}
+            )
+            note.category = cat_obj
+            note.save(update_fields=['category'])
 
     return redirect(reverse('notes'))
 
