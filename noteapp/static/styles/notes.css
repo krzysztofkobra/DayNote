@@ -113,7 +113,7 @@
             gap: 1rem;
         }
 
-        .create-category-btn, .add-note-btn {
+        .create-category-btn, .add-note-btn, .auto-cat-btn {
             padding: 0.5rem 1rem;
         }
 
@@ -184,7 +184,7 @@
             background-color: #f0f0f0;
         }
 
-        .add-note-btn {
+        .add-note-btn, .create-category-btn, .auto-cat-btn{
             background-color: var(--apple-blue);
             color: white;
             border: none;
@@ -196,23 +196,7 @@
             transition: background-color 0.2s;
         }
 
-        .add-note-btn:hover {
-            background-color: #005bbf;
-        }
-
-        .create-category-btn {
-            background-color: var(--apple-blue);
-            color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-
-        .create-note-btn:hover {
+        .add-note-btn:hover, .create-category-btn:hover, .auto-cat-btn:hover {
             background-color: #005bbf;
         }
 

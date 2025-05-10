@@ -5,15 +5,19 @@ from django.views.decorators.csrf import csrf_exempt
 from django.urls import reverse
 from django.contrib.auth.models import User
 from django.conf import settings
+from django.http import HttpResponse
+
 from .forms import RegisterForm, UserProfileForm
 from .models import Event, Note, UserProfile, NoteCategory
+from .services import categorize_note_content, NoteCategorizer, recategorize_all_notes
+
 import calendar
 from datetime import datetime, date
 from calendar import monthrange
+
 from google.oauth2 import id_token
 from google.auth.transport import requests
-from django.http import HttpResponse
-from .services import categorize_note_content
+
 import json
 
 
@@ -338,16 +342,16 @@ def add_note(request):
                 user=request.user
             )
 
-        if category is None:
-            result = categorize_note_content(content)
-            cat_name = result.get('category', 'Uncategorized')
-            cat_obj, _ = NoteCategory.objects.get_or_create(
-                name=cat_name,
-                user=request.user,
-                defaults={'color': '#cccccc'}
-            )
-            note.category = cat_obj
-            note.save(update_fields=['category'])
+        # if category is None:
+        #     result = categorize_note_content(content)
+        #     cat_name = result.get('category', 'Uncategorized')
+        #     cat_obj, _ = NoteCategory.objects.get_or_create(
+        #         name=cat_name,
+        #         user=request.user,
+        #         defaults={'color': '#cccccc'}
+        #     )
+        #     note.category = cat_obj
+        #     note.save(update_fields=['category'])
 
     return redirect(reverse('notes'))
 
@@ -422,6 +426,22 @@ def remove_category_from_note(request):
         except Note.DoesNotExist:
             pass
 
+    return redirect(reverse('notes'))
+
+
+@login_required
+def autocategorize_all_notes(request):
+    user = request.user
+    categorizer = NoteCategorizer(user)
+    notes = Note.objects.filter(user=user)
+    for note in notes:
+        if note.category is None:
+            result = categorizer.categorize_note(note.content)
+            if result["category"]:
+                cat = categorizer.batch_categorize([note])[0].category
+                if cat:
+                    note.category = cat
+                    note.save(update_fields=["category"])
     return redirect(reverse('notes'))
 
 @login_required

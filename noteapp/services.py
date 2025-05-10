@@ -11,10 +11,15 @@ env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env')
 load_dotenv(dotenv_path=env_path)
 
 class NoteCategorizer:
-    def __init__(self):
+    def __init__(self, user):
+        self.user = user
         api_key = settings.OPENAI_API_KEY
         self.client = openai.OpenAI(api_key=api_key)
-        self.available_categories = list(NoteCategory.objects.values_list('name', flat=True)) or []
+        self.available_categories = list(
+            NoteCategory.objects
+            .filter(user=user)
+            .values_list('name', flat=True)
+        ) or []
 
     def categorize_note(self, note_content: str, max_tokens: int = 100) -> Dict:
         cache_key = f"note_category_{hash(note_content)}"
@@ -50,14 +55,18 @@ class NoteCategorizer:
         cache.set(cache_key, result, 86400)
         return result
 
-    def batch_categorize(self, notes: List[Dict]) -> List[Dict]:
+    def batch_categorize(self, notes):
         out = []
         for note in notes:
-            if not note.get('content'):
-                note['category'] = 'Uncategorized'
+            if note.content:
+                cat = self.categorize_note(note.content)["category"]
             else:
-                res = self.categorize_note(note['content'])
-                note['category'] = res['category']
+                cat = None
+            note.category = (
+                NoteCategory.objects
+                            .filter(user=self.user, name=cat)
+                            .first()
+            )
             out.append(note)
         return out
 
@@ -67,10 +76,11 @@ def categorize_note_content(content: str) -> Dict:
 def recategorize_all_notes():
     categorizer = NoteCategorizer()
     for note in Note.objects.all():
-        res = categorizer.categorize_note(note.content)
-        try:
-            cat = NoteCategory.objects.get(name=res['category'])
-            note.category = cat
-            note.save(update_fields=['category'])
-        except NoteCategory.DoesNotExist:
-            continue
+        if note.category is None:
+            res = categorizer.categorize_note(note.content)
+            try:
+                cat = NoteCategory.objects.get(name=res['category'])
+                note.category = cat
+                note.save(update_fields=['category'])
+            except NoteCategory.DoesNotExist:
+                continue

@@ -27,6 +27,10 @@
         <div class="notes-header">
             <h1 class="notes-title">My Notes</h1>
             <div class="button-group">
+                <form method="post" action="{% url 'autocategorize_all_notes' %}">
+                  {% csrf_token %}
+                  <button type="submit" class="auto-cat-btn">Autocategorize All</button>
+                </form>
                 <button class="create-category-btn" data-bs-toggle="modal" data-bs-target="#categoryModal">+ Create Category</button>
                 <button class="add-note-btn" data-bs-toggle="modal" data-bs-target="#noteModal">+ Add Note</button>
             </div>
@@ -37,6 +41,7 @@
                 var deleteNoteUrl = "{% url 'delete_note' %}";
                 var deleteCategoryUrl = "{% url 'delete_category' %}";
                 var removeCategoryFromNoteUrl = "{% url 'remove_category_from_note' %}";
+                var autoCategorizeUrl = "{% url 'autocategorize_all_notes' %}";
             </script>
 
             {% if notes %}

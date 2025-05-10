@@ -30,7 +30,7 @@ class Event(models.Model):
         return datetime.datetime.combine(self.date, self.end_time)
 
 class NoteCategory(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='categories')
     name = models.CharField(max_length=100)
     color = models.CharField(max_length=7, default="#FFFFFF")
 

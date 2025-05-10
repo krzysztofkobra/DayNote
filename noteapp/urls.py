@@ -18,4 +18,5 @@ urlpatterns = [
     path('notes/remove_category_from_note/', views.remove_category_from_note, name='remove_category_from_note'),
     path('notes/create_category/', views.create_category, name='create_category'),
     path('accounts/delete/', views.delete_account_view, name='delete_account'),
+    path('notes/autocategorize/', views.autocategorize_all_notes, name='autocategorize_all_notes'),
 ]
