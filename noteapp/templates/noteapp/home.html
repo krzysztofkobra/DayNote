@@ -35,12 +35,19 @@
                     <input type="hidden" id="monthInput" name="month" value="{{ month }}">
                 </form>
 
-                <div class="view-selector">
-                    <select id="viewSelector" class="form-select form-select-sm" onchange="changeView()">
-                        <option value="day" {% if view == 'day' %}selected{% endif %}>Day</option>
-                        <option value="week" {% if view == 'week' %}selected{% endif %}>Week</option>
-                        <option value="month" {% if view == 'month' or not view %}selected{% endif %}>Month</option>
-                    </select>
+                <div class="input-group">
+                    <span class="input-group-text" id="basic-addon1">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-grid-1x2-fill" viewBox="0 0 16 16">
+                        <path d="M0 1a1 1 0 0 1 1-1h5a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H1a1 1 0 0 1-1-1zm9 0a1 1 0 0 1 1-1h5a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1h-5a1 1 0 0 1-1-1zm0 9a1 1 0 0 1 1-1h5a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1h-5a1 1 0 0 1-1-1z"/>
+                    </svg>
+                </span>
+                    <div class="view-selector">
+                        <select id="viewSelector" class="form-select form-select-sm" onchange="changeView()">
+                            <option value="month" {% if view == 'month' or not view %}selected{% endif %}>Month</option>
+                            <option value="week" {% if view == 'week' %}selected{% endif %}>Week</option>
+                            <option value="day" {% if view == 'day' %}selected{% endif %}>Day</option>
+                        </select>
+                    </div>
                 </div>
 
                 <button class="previous-month" onclick="navigateMonth(-1)">&lt;</button>
