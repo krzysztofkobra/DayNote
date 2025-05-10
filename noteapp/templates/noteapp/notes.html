@@ -41,7 +41,6 @@
                 var deleteNoteUrl = "{% url 'delete_note' %}";
                 var deleteCategoryUrl = "{% url 'delete_category' %}";
                 var removeCategoryFromNoteUrl = "{% url 'remove_category_from_note' %}";
-                var autoCategorizeUrl = "{% url 'autocategorize_all_notes' %}";
             </script>
 
             {% if notes %}
@@ -99,6 +98,7 @@
                                             {{ category.name }}
                                         </option>
                                     {% endfor %}
+                                    <option value="autocategorize">Autocategorize</option>
                                     <option value="new">+ Create new category</option>
                                 </select>
                                 <div id="categoryColorBox" class="category-color-display"></div>

@@ -323,6 +323,17 @@ def add_note(request):
                 color=new_category_color,
                 user=request.user
             )
+        elif category_id == 'autocategorize':
+            categorizer = NoteCategorizer(request.user)
+            result = categorizer.categorize_note(content)
+            cat_name = result.get('category', 'Uncategorized')
+            cat_obj, _ = NoteCategory.objects.get_or_create(
+                    name=cat_name,
+                    user=request.user,
+                    defaults={'color': '#cccccc'}
+                )
+            category = cat_obj
+
         elif category_id:
             category = NoteCategory.objects.get(id=category_id)
         else:
@@ -341,17 +352,6 @@ def add_note(request):
                 category=category,
                 user=request.user
             )
-
-        # if category is None:
-        #     result = categorize_note_content(content)
-        #     cat_name = result.get('category', 'Uncategorized')
-        #     cat_obj, _ = NoteCategory.objects.get_or_create(
-        #         name=cat_name,
-        #         user=request.user,
-        #         defaults={'color': '#cccccc'}
-        #     )
-        #     note.category = cat_obj
-        #     note.save(update_fields=['category'])
 
     return redirect(reverse('notes'))
 
@@ -431,9 +431,8 @@ def remove_category_from_note(request):
 
 @login_required
 def autocategorize_all_notes(request):
-    user = request.user
-    categorizer = NoteCategorizer(user)
-    notes = Note.objects.filter(user=user)
+    categorizer = NoteCategorizer(request.user)
+    notes = Note.objects.filter(user=request.user)
     for note in notes:
         if note.category is None:
             result = categorizer.categorize_note(note.content)
