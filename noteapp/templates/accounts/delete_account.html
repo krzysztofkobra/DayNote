@@ -1,0 +1,59 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delete Account - DayNote</title>
+    <link rel="stylesheet" href="{% static 'styles/delete_acc_styles.css' %}">
+</head>
+<body>
+    <div class="container">
+        <h2>Delete Your Account</h2>
+
+        <div class="warning-box">
+            <div class="warning-title">Warning: This action cannot be undone!</div>
+            <p>Deleting your account will permanently remove:</p>
+            <ul class="warning-list">
+                <li>All your notes</li>
+                <li>All your calendar events</li>
+                <li>All your categories</li>
+                <li>Your profile information</li>
+                <li>Your account settings</li>
+            </ul>
+            <p>Any data associated with your account will be irretrievably lost.</p>
+        </div>
+
+        {% if error %}
+        <div class="error-message">
+            {{ error }}
+        </div>
+        {% endif %}
+
+        <form method="POST" action="{% url 'delete_account' %}">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label for="confirmation">Type <strong>DELETE</strong> to confirm:</label>
+                <input type="text" id="confirmation" name="confirmation"
+                       class="confirmation-input" required>
+            </div>
+            <div class="help-text">This helps prevent accidental deletion.</div>
+
+            {% if not user.profile.google_connected and user.has_usable_password %}
+            <div class="form-group">
+                <label for="password">Enter your password:</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <div class="help-text">We need to verify it's really you.</div>
+            {% endif %}
+
+            <div class="button-container">
+                <a href="{% url 'account' %}" class="btn-shared btn-cancel">Cancel</a>
+                <button type="submit" class="btn-shared btn-delete">Delete My Account</button>
+            </div>
+
+        </form>
+    </div>
+</body>
+</html>

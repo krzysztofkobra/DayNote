@@ -16,15 +16,30 @@ from django.http import HttpResponse
 from .services import categorize_note_content
 import json
 
+
 @csrf_exempt
 def auth_receiver(request):
     if request.method == 'POST':
         try:
             token = request.POST.get('credential')
+            if not token:
+                try:
+                    data = json.loads(request.body.decode('utf-8'))
+                    token = data.get('credential')
+                except:
+                    pass
+
+            if not token:
+                return HttpResponse('No credential token found', status=400)
 
             client_id = settings.GOOGLE_OAUTH_CLIENT_ID
 
-            idinfo = id_token.verify_oauth2_token(token, requests.Request(), client_id)
+            idinfo = id_token.verify_oauth2_token(
+                token,
+                requests.Request(),
+                client_id,
+                clock_skew_in_seconds=10
+            )
 
             email = idinfo['email']
             name = idinfo.get('name', '')
@@ -45,19 +60,17 @@ def auth_receiver(request):
                     password=None
                 )
 
-                profile, created = UserProfile.objects.get_or_create(user=user)
-                profile.google_connected = True
-                profile.save()
-            else:
-                profile, created = UserProfile.objects.get_or_create(user=user)
-                profile.google_connected = True
-                profile.save()
+            profile, created = UserProfile.objects.get_or_create(user=user)
+            profile.google_connected = True
+            profile.save()
 
             login(request, user)
             return redirect('home')
 
-        except ValueError:
-            return HttpResponse('Invalid token', status=403)
+        except ValueError as e:
+            return HttpResponse(f'Invalid token: {str(e)}', status=403)
+        except Exception as e:
+            return HttpResponse(f'Authentication error: {str(e)}', status=403)
 
     return HttpResponse('Method not allowed', status=405)
 
@@ -94,6 +107,49 @@ def logout_view(request):
         return redirect('login')
     else:
         return render(request, 'accounts/logout.html')
+
+@login_required
+def delete_account_view(request):
+    if request.method == 'GET':
+        return render(request, 'accounts/delete_account.html')
+
+    elif request.method == 'POST':
+        confirmation = request.POST.get('confirmation')
+        password = request.POST.get('password')
+
+        if confirmation != 'DELETE':
+            return render(request, 'accounts/delete_account.html', {
+                'error': 'Please type DELETE to confirm account deletion.'
+            })
+
+        if not request.user.profile.google_connected and request.user.has_usable_password():
+            if not password:
+                return render(request, 'accounts/delete_account.html', {
+                    'error': 'Please enter your password to confirm account deletion.'
+                })
+
+            if not request.user.check_password(password):
+                return render(request, 'accounts/delete_account.html', {
+                    'error': 'Incorrect password. Please try again.'
+                })
+
+        user = request.user
+
+        Event.objects.filter(user=user).delete()
+        Note.objects.filter(user=user).delete()
+        NoteCategory.objects.filter(user=user).delete()
+
+        try:
+            profile = UserProfile.objects.get(user=user)
+            profile.delete()
+        except UserProfile.DoesNotExist:
+            pass
+
+        logout(request)
+
+        user.delete()
+
+        return render(request, 'accounts/account_deleted.html')
 
 @login_required
 def calendar_view(request):

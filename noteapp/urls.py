@@ -17,4 +17,5 @@ urlpatterns = [
     path('notes/delete_category/', views.delete_category, name='delete_category'),
     path('notes/remove_category_from_note/', views.remove_category_from_note, name='remove_category_from_note'),
     path('notes/create_category/', views.create_category, name='create_category'),
+    path('accounts/delete/', views.delete_account_view, name='delete_account'),
 ]
