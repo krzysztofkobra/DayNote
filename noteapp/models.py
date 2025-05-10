@@ -31,7 +31,7 @@ class Event(models.Model):
 
 class NoteCategory(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    name = models.CharField(max_length=100, unique=True)
+    name = models.CharField(max_length=100)
     color = models.CharField(max_length=7, default="#FFFFFF")
 
     def __str__(self):

@@ -263,7 +263,6 @@ def add_event(request):
         date_str = request.POST.get('date')
         color = request.POST.get('color')
 
-
         event_date = datetime.strptime(date_str, '%Y-%m-%d').date()
 
         if event_id:
