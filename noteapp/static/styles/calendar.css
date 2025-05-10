@@ -47,7 +47,7 @@ body {
             margin-bottom: 2rem;
             font-size: 1rem;
             font-weight: 600;
-            color: var(--apple-blue);
+            color: #555;
         }
 
         .sidebar .username:hover {
