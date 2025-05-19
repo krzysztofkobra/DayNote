@@ -202,9 +202,8 @@
         .actions {
             display: flex;
             justify-content: space-between;
-            margin-top: 2rem;
+            margin-top: 1rem;
             padding-top: 1rem;
-            border-top: 1px solid #eee;
         }
 
 .account {

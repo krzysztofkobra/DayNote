@@ -4,11 +4,19 @@
 *.pyo
 *.db
 *.sqlite3
-.idea
-../stara wersja/DayNote/.env
+
+# IDE
+.idea/
 __pycache__/
-db.sqlite3
-settings.py
-*/migrations
-manage.py
-media/
+
+# Backend
+backend/.env
+backend/db.sqlite3
+backend/media/
+backend/**/migrations/
+backend/DayNote/settings.py
+backend/DayNote/manage.py
+
+# Frontend
+frontend/node_modules/
+frontend/build/

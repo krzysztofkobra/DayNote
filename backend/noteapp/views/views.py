@@ -7,9 +7,9 @@ from django.contrib.auth.models import User
 from django.conf import settings
 from django.http import HttpResponse
 
-from .forms import RegisterForm, UserProfileForm
-from .models import Event, Note, UserProfile, NoteCategory
-from .services import categorize_note_content, NoteCategorizer, recategorize_all_notes
+from backend.noteapp.forms import RegisterForm, UserProfileForm
+from backend.noteapp.models import Event, Note, UserProfile, NoteCategory
+from backend.noteapp.services import categorize_note_content, NoteCategorizer, recategorize_all_notes
 
 import calendar
 from datetime import datetime, date
