@@ -1,3 +1,5 @@
+import 'bootstrap/dist/css/bootstrap.min.css'
+import '../styles/acc_styles.css'
 import { useState } from 'react'
 
 export default function Login() {
@@ -5,33 +7,51 @@ export default function Login() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState(null)
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    const formData = new FormData()
-    formData.append('username', username)
-    formData.append('password', password)
-
-    try {
-      const res = await fetch('/login/', {
-        method: 'POST',
-        body: formData,
-        credentials: 'include',
-      })
-
-      if (res.redirected) {
-        window.location.href = res.url
-      } else {
-        const text = await res.text()
-        if (text.includes('Invalid')) setError('Invalid login credentials')
-        else setError('Login failed')
-      }
-    } catch {
-      setError('Login request failed')
+ function getCookie(name) {
+  const cookies = document.cookie.split(';').map(c => c.trim())
+  for (let cookie of cookies) {
+    if (cookie.startsWith(name + '=')) {
+      return decodeURIComponent(cookie.split('=')[1])
     }
   }
+  return null
+}
+
+const csrfToken = getCookie('csrftoken')
+
+const handleSubmit = async (e) => {
+  e.preventDefault()
+  const formData = new FormData()
+  formData.append('username', username)
+  formData.append('password', password)
+  console.log('CSRF token:', csrfToken)
+
+  try {
+    const res = await fetch('http://localhost:8000/api/login/', {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': csrfToken,
+      },
+      body: formData,
+      credentials: 'include',
+    })
+
+    if (res.ok) {
+      const data = await res.json()
+      if (data.status === 'ok') {
+        window.location.href = '/'
+      }
+    } else {
+      const data = await res.json()
+      setError(data.error || 'Login failed')
+    }
+  } catch {
+    setError('Login request failed')
+  }
+}
 
   return (
-    <div className="container py-5" style={{ maxWidth: 400 }}>
+    <div className="container py-5">
       <h2 className="mb-4">Login</h2>
       <form onSubmit={handleSubmit}>
         <div className="mb-3">
@@ -50,7 +70,7 @@ export default function Login() {
              data-client_id="308372104322-7fiej93q3a3i4mgrq2b1n5rua41sc0ok.apps.googleusercontent.com"
              data-context="signin"
              data-ux_mode="redirect"
-             data-login_uri="http://localhost:8000/auth-receiver/"
+             data-login_uri="http://localhost:8000/api/auth-receiver/"
              data-auto_prompt="false">
         </div>
 

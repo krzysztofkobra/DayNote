@@ -50,7 +50,6 @@ def auth_receiver(request):
     except Exception as e:
         return Response({'error': f'Authentication error: {str(e)}'}, status=403)
 
-@csrf_exempt
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def register_view(request):
