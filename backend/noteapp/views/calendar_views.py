@@ -82,72 +82,70 @@ def calendar_view(request):
         'month': month,
     })
 
-@api_view(['POST'])
+@api_view(['GET', 'POST', 'PUT', 'DELETE'])
 @permission_classes([IsAuthenticated])
-def add_event(request):
-    data = request.data
-    event_id = data.get('event_id')
-    title = data.get('title')
-    date_str = data.get('date')
-    color = data.get('color')
+def event_view(request, event_id=None):
+    if request.method == 'GET':
+        start = request.GET.get('start')
+        end = request.GET.get('end')
+        if not start or not end:
+            return Response({'error': 'start and end parameters are required'}, status=400)
 
-    try:
-        event_date = datetime.strptime(date_str, '%Y-%m-%d').date()
-    except Exception as e:
-        return Response({'error': 'Invalid date format'}, status=status.HTTP_400_BAD_REQUEST)
+        events = Event.objects.filter(
+            user=request.user,
+            date__range=[start, end]
+        ).order_by('date')
 
-    if event_id:
+        result = [{
+            'id': e.id,
+            'title': e.title,
+            'date': e.date.strftime('%Y-%m-%d'),
+            'color': e.color
+        } for e in events]
+
+        return Response(result)
+
+    if request.method in ['POST', 'PUT']:
+        title = request.data.get('title')
+        date_str = request.data.get('date')
+        color = request.data.get('color')
+
         try:
-            event = Event.objects.get(id=event_id, user=request.user)
+            event_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+        except Exception:
+            return Response({'error': 'Invalid date format'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if request.method == 'POST':
+            event_id = request.data.get('event_id')
+            if event_id:
+                try:
+                    event = Event.objects.get(id=event_id, user=request.user)
+                    event.title = title
+                    event.date = event_date
+                    event.color = color
+                    event.save()
+                    serializer = EventSerializer(event)
+                    return Response(serializer.data, status=status.HTTP_200_OK)
+                except Event.DoesNotExist:
+                    return Response({'error': 'Event not found'}, status=status.HTTP_404_NOT_FOUND)
+            else:
+                event = Event.objects.create(title=title, date=event_date, color=color, user=request.user)
+                serializer = EventSerializer(event)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        if request.method == 'PUT':
+            event = get_object_or_404(Event, id=event_id, user=request.user)
             event.title = title
             event.date = event_date
             event.color = color
             event.save()
-            serializer = EventSerializer(event)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except Event.DoesNotExist:
-            return Response({'error': 'Event not found'}, status=status.HTTP_404_NOT_FOUND)
-    else:
-        event = Event.objects.create(
-            title=title,
-            date=event_date,
-            color=color,
-            user=request.user
-        )
-        serializer = EventSerializer(event)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response({'status': 'ok'})
 
-@api_view(['POST', 'PUT'])
-@permission_classes([IsAuthenticated])
-def event_view(request, event_id=None):
-    if request.method == 'POST':
-        title = request.data.get('title')
-        date_str = request.data.get('date')
-        color = request.data.get('color')
-        event_date = datetime.strptime(date_str, '%Y-%m-%d').date()
-        Event.objects.create(title=title, date=event_date, color=color, user=request.user)
-        return Response({'status': 'ok'})
+    if request.method == 'DELETE':
+        event_id = request.GET.get('event_id')
+        if not event_id:
+            return Response({'error': 'event_id is required'}, status=400)
 
-    if request.method == 'PUT':
         event = get_object_or_404(Event, id=event_id, user=request.user)
-        title = request.data.get('title')
-        date_str = request.data.get('date')
-        color = request.data.get('color')
-        event_date = datetime.strptime(date_str, '%Y-%m-%d').date()
-        event.title = title
-        event.date = event_date
-        event.color = color
-        event.save()
+        event.delete()
         return Response({'status': 'ok'})
-
-
-@api_view(['DELETE'])
-@permission_classes([IsAuthenticated])
-def delete_event(request):
-    event_id = request.GET.get('event_id')
-    if event_id:
-        try:
-            Event.objects.get(id=event_id, user=request.user).delete()
-        except Event.DoesNotExist:
-            pass
-    return Response({'status': 'ok'})

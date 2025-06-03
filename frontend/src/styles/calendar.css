@@ -4,3 +4,21 @@ html, body, #root {
   margin: 0;
   padding: 0;
 }
+
+.event-blue {
+    background-color: rgba(0, 113, 227, 0.1);
+    color: var(--apple-blue);
+    border-left: 3px solid var(--apple-blue);
+}
+
+.event-green {
+    background-color: rgba(70, 190, 120, 0.1);
+    color: #46be78;
+    border-left: 3px solid #46be78;
+}
+
+.event-orange {
+    background-color: rgba(255, 149, 0, 0.1);
+    color: #ff9500;
+    border-left: 3px solid #ff9500;
+}

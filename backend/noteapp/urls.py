@@ -4,8 +4,8 @@ from .views import account_views, calendar_views, auth_views, note_views, settin
 
 urlpatterns = [
     path('', calendar_views.calendar_view, name='home'),
-    path('add-event/', calendar_views.add_event, name='add_event'),
-    path('delete-event/', calendar_views.delete_event, name='delete_event'),
+    path('event/', calendar_views.event_view, name='event'),
+    path('event/<int:event_id>/', calendar_views.event_view, name='event_with_id'),
 
     path('settings/', settings_views.settings_view, name='settings'),
 
