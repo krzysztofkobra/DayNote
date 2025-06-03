@@ -55,3 +55,14 @@ def delete_account_view(request):
         user.delete()
 
         return Response({"status": "account_deleted"})
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def current_user(request):
+    user = request.user
+    profile = getattr(user, 'profile', None)
+    avatar_url = profile.avatar.url if profile and profile.avatar else ''
+    return Response({
+        'username': user.username,
+        'avatar': avatar_url,
+})

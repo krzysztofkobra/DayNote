@@ -16,7 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include, re_path
-from noteapp.views import auth_views
+from noteapp.views.auth_views import auth_receiver
 from django.conf import settings
 from django.conf.urls.static import static
 from django.views.generic import TemplateView
@@ -24,7 +24,7 @@ from django.views.generic import TemplateView
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('noteapp.urls')),
-    path('auth-receiver/', auth_views.auth_receiver, name='auth_receiver'),
+    path('auth-receiver/', auth_receiver, name='auth_receiver'),
 ]
 
 if settings.DEBUG:

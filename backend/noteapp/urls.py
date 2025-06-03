@@ -14,6 +14,7 @@ urlpatterns = [
     path('register/', auth_views.register_view, name='register'),
 
     path('accounts/profile/', account_views.account_view, name='account'),
+    path('user/', account_views.current_user),
     path('accounts/delete/', account_views.delete_account_view, name='delete_account'),
 
     path('notes/', note_views.notes_view, name='notes'),
