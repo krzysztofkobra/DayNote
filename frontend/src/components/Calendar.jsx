@@ -414,18 +414,18 @@ const renderDayView = () => {
             className="w-20 h-20 rounded-full object-cover"
             onError={e => { e.target.src = 'https://via.placeholder.com/80'; }}
         />
-        <a href="/twoja-sciezka" className="font-semibold text-gray-800 hover:text-blue-600 transition-colors duration-300 no-underline">
+        <a href="#" className="font-semibold text-gray-800 hover:text-blue-600 transition-colors duration-300 no-underline">
             {user.username}
         </a>
       </div>
 
       <nav className="flex-1 p-4">
         <div className="space-y-2">
-          <a href="#" className="flex items-center space-x-3 p-3 bg-blue-100 text-blue-600 rounded-lg">
+          <a href="/" className="flex items-center space-x-3 p-3 bg-blue-100 text-blue-600 rounded-lg">
             <Calendar size={20} />
             <span>Calendar</span>
           </a>
-          <a href="#" className="flex items-center space-x-3 p-3 text-gray-600 hover:bg-gray-100 rounded-lg">
+          <a href="/notes" className="flex items-center space-x-3 p-3 text-gray-600 hover:bg-gray-100 rounded-lg">
             <StickyNote size={20} />
             <span>Notes</span>
           </a>
