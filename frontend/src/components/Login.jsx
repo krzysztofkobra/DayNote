@@ -7,48 +7,45 @@ export default function Login() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState(null)
 
- function getCookie(name) {
-  const cookies = document.cookie.split(';').map(c => c.trim())
-  for (let cookie of cookies) {
-    if (cookie.startsWith(name + '=')) {
-      return decodeURIComponent(cookie.split('=')[1])
-    }
-  }
-  return null
-}
-
-const csrfToken = getCookie('csrftoken')
-
-const handleSubmit = async (e) => {
-  e.preventDefault()
-  const formData = new FormData()
-  formData.append('username', username)
-  formData.append('password', password)
-  console.log('CSRF token:', csrfToken)
-
-  try {
-    const res = await fetch('http://localhost:8000/api/login/', {
-      method: 'POST',
-      headers: {
-        'X-CSRFToken': csrfToken,
-      },
-      body: formData,
-      credentials: 'include',
-    })
-
-    if (res.ok) {
-      const data = await res.json()
-      if (data.status === 'ok') {
-        window.location.href = '/'
+  function getCookie(name) {
+    const cookies = document.cookie.split(';').map(c => c.trim())
+    for (let cookie of cookies) {
+      if (cookie.startsWith(name + '=')) {
+        return decodeURIComponent(cookie.split('=')[1])
       }
-    } else {
-      const data = await res.json()
-      setError(data.error || 'Login failed')
     }
-  } catch {
-    setError('Login request failed')
+    return null
   }
-}
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const csrfToken = getCookie('csrftoken');
+    const payload = { username, password };
+
+    try {
+      const res = await fetch('http://localhost:8000/api/login/', {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': csrfToken,
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(payload)
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.status === 'ok') {
+          window.location.href = '/';
+        }
+      } else {
+        const data = await res.json();
+        setError(data.error || 'Login failed');
+      }
+    } catch {
+      setError('Login request failed');
+    }
+  }
 
   return (
     <div className="container py-5">

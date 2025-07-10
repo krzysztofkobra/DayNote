@@ -1,5 +1,7 @@
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, authentication_classes
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
@@ -85,9 +87,16 @@ def calendar_view(request):
 @api_view(['GET', 'POST', 'PUT', 'DELETE'])
 @permission_classes([IsAuthenticated])
 def event_view(request, event_id=None):
+    print(f"Method: {request.method}")
+    print(f"User: {request.user}")
+    print(f"Cookies: {request.COOKIES}")
+    print(f"Headers: {request.headers}")
+    print(f"Data: {request.data}")
+
     if request.method == 'GET':
         start = request.GET.get('start')
         end = request.GET.get('end')
+        print(f"GET params - start: {start}, end: {end}")
         if not start or not end:
             return Response({'error': 'start and end parameters are required'}, status=400)
 
@@ -105,21 +114,24 @@ def event_view(request, event_id=None):
 
         return Response(result)
 
-    if request.method in ['POST', 'PUT']:
+    elif request.method in ['POST', 'PUT']:
         title = request.data.get('title')
         date_str = request.data.get('date')
         color = request.data.get('color')
+        print(f"POST/PUT data - title: {title}, date: {date_str}, color: {color}, event_id: {event_id}")
 
         try:
             event_date = datetime.strptime(date_str, '%Y-%m-%d').date()
-        except Exception:
+        except Exception as e:
+            print(f"Date parsing error: {e}")
             return Response({'error': 'Invalid date format'}, status=status.HTTP_400_BAD_REQUEST)
 
         if request.method == 'POST':
-            event_id = request.data.get('event_id')
-            if event_id:
+            event_id_post = request.data.get('event_id')
+            print(f"POST event_id in data: {event_id_post}")
+            if event_id_post:
                 try:
-                    event = Event.objects.get(id=event_id, user=request.user)
+                    event = Event.objects.get(id=event_id_post, user=request.user)
                     event.title = title
                     event.date = event_date
                     event.color = color
@@ -133,7 +145,9 @@ def event_view(request, event_id=None):
                 serializer = EventSerializer(event)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-        if request.method == 'PUT':
+        elif request.method == 'PUT':
+            if not event_id:
+                return Response({'error': 'event_id is required in URL for PUT'}, status=400)
             event = get_object_or_404(Event, id=event_id, user=request.user)
             event.title = title
             event.date = event_date
@@ -141,11 +155,12 @@ def event_view(request, event_id=None):
             event.save()
             return Response({'status': 'ok'})
 
-    if request.method == 'DELETE':
-        event_id = request.GET.get('event_id')
-        if not event_id:
+    elif request.method == 'DELETE':
+        event_id_delete = request.GET.get('event_id')
+        print(f"DELETE event_id: {event_id_delete}")
+        if not event_id_delete:
             return Response({'error': 'event_id is required'}, status=400)
 
-        event = get_object_or_404(Event, id=event_id, user=request.user)
+        event = get_object_or_404(Event, id=event_id_delete, user=request.user)
         event.delete()
         return Response({'status': 'ok'})

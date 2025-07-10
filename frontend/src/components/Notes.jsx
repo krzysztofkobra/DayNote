@@ -1,5 +1,4 @@
 import 'bootstrap/dist/css/bootstrap.min.css'
-// import '../styles/notes.css'
 import React, { useState, useEffect } from 'react';
 import { Calendar, Settings, StickyNote, Filter, Plus, Edit, Trash2, X, Tag } from 'lucide-react';
 
@@ -36,7 +35,7 @@ const NotesApp = () => {
 
   const fetchUser = async () => {
     try {
-      const res = await fetch('/api/user/', { credentials: 'include' });
+      const res = await fetch('http://localhost:8000/api/user/', { credentials: 'include' });
       if (res.ok) {
         const data = await res.json();
         setUser({
@@ -59,7 +58,7 @@ const NotesApp = () => {
 
   const fetchNotesAndCategories = async () => {
     try {
-      const res = await fetch('/api/notes/', { credentials: 'include' });
+      const res = await fetch('http://localhost:8000/api/notes/', { credentials: 'include' });
       if (res.ok) {
         const data = await res.json();
         setNotes(data.notes || []);
@@ -121,7 +120,7 @@ const NotesApp = () => {
     e.preventDefault();
     
     try {
-      const url = editingNote ? `/api/notes/note/${editingNote.id}/` : '/api/notes/note/';
+      const url = editingNote ? `http://localhost:8000/api/notes/note/${editingNote.id}/` : 'http://localhost:8000/api/notes/note/';
       const method = editingNote ? 'PUT' : 'POST';
       
       const res = await fetch(url, {
@@ -152,7 +151,7 @@ const NotesApp = () => {
   const deleteNote = async (noteId) => {
     if (window.confirm('Are you sure you want to delete this note?')) {
       try {
-        const res = await fetch(`/api/notes/note/${noteId}/`, {
+        const res = await fetch(`http://localhost:8000/api/notes/note/${noteId}/`, {
           method: 'DELETE',
           credentials: 'include',
           headers: {
@@ -173,7 +172,7 @@ const NotesApp = () => {
     e.preventDefault();
     
     try {
-      const res = await fetch('/api/notes/category/', {
+      const res = await fetch('http://localhost:8000/api/notes/category/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -198,7 +197,7 @@ const NotesApp = () => {
 
   const removeCategoryFromNote = async (noteId) => {
     try {
-      const res = await fetch(`/api/notes/note/${noteId}/remove_category/`, {
+      const res = await fetch(`http://localhost:8000/api/notes/note/${noteId}/remove_category/`, {
         method: 'POST',
         credentials: 'include',
         headers: {
@@ -216,7 +215,7 @@ const NotesApp = () => {
 
   const autocategorizeAll = async () => {
     try {
-      const res = await fetch('/api/notes/autocategorize/', {
+      const res = await fetch('http://localhost:8000/api/notes/autocategorize/', {
         method: 'POST',
         credentials: 'include',
         headers: {
@@ -279,10 +278,8 @@ const NotesApp = () => {
               <span>Notes</span>
             </a>
           </div>
-
           <div className="mt-6">
             <div className="text-sm font-medium text-gray-700 mb-3">Filter Options</div>
-            
             <div className="flex items-center space-x-2 mb-3">
               <Filter size={16} className="text-gray-500" />
               <select 
@@ -291,12 +288,10 @@ const NotesApp = () => {
                 className="text-sm border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="last-edit">Last Edit</option>
-                <option value="auto">Auto</option>
                 <option value="az">A-Z</option>
                 <option value="za">Z-A</option>
               </select>
             </div>
-
             <div className="space-y-2">
               <div className="text-sm font-medium text-gray-700">Categories</div>
               <label className="flex items-center space-x-2 text-sm">
@@ -324,7 +319,6 @@ const NotesApp = () => {
             </div>
           </div>
         </nav>
-
         <div className="p-4 border-t">
           <a href="/settings" className="flex items-center space-x-3 p-3 text-gray-600 hover:bg-gray-100 rounded-lg">
             <Settings size={20} />
@@ -332,11 +326,9 @@ const NotesApp = () => {
           </a>
         </div>
       </div>
-
       <div className="flex-1 flex flex-col">
         <div className="flex items-center justify-between p-6 bg-white border-b">
           <h1 className="text-2xl font-bold text-gray-700">My Notes</h1>
-          
           <div className="flex items-center space-x-3">
             <button
               onClick={autocategorizeAll}
@@ -360,7 +352,6 @@ const NotesApp = () => {
             </button>
           </div>
         </div>
-
         <div className="flex-1 p-6 overflow-auto">
           {filteredNotes.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-gray-500">
@@ -399,15 +390,12 @@ const NotesApp = () => {
                       </div>
                     )}
                   </div>
-                  
                   <p className="text-gray-600 text-sm mb-4 line-clamp-3">
                     {note.content}
                   </p>
-                  
                   <div className="text-xs text-gray-400 mb-3">
                     Last updated: {formatDate(note.updated_at)}
                   </div>
-                  
                   <div className="flex items-center justify-end space-x-2">
                     <button
                       onClick={() => openNoteModal(note)}
@@ -430,7 +418,6 @@ const NotesApp = () => {
           )}
         </div>
       </div>
-
       {showNoteModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-2xl mx-4 max-h-screen overflow-y-auto">
@@ -445,7 +432,6 @@ const NotesApp = () => {
                 <X size={20} />
               </button>
             </div>
-
             <form onSubmit={handleNoteSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -459,7 +445,6 @@ const NotesApp = () => {
                   required
                 />
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Category
@@ -467,104 +452,64 @@ const NotesApp = () => {
                 <div className="flex items-center space-x-2">
                   <select
                     value={noteForm.category}
-                    onChange={(e) => setNoteForm({ ...noteForm, category: e.target.value })}
-                    className="flex-1 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    onChange={e => setNoteForm({ ...noteForm, category: e.target.value })}
+                    className="border border-gray-300 rounded px-2 py-1"
                   >
-                    <option value="">No category</option>
-                    {categories.map(category => (
-                      <option key={category.id} value={category.id}>
-                        {category.name}
-                      </option>
-                    ))}
+                    <option value="">None</option>
+                    <option value="new">+ New Category</option>
                     <option value="autocategorize">Autocategorize</option>
-                    <option value="new">+ Create new category</option>
+                    {categories.map(cat => (
+                      <option key={cat.id} value={cat.id}>{cat.name}</option>
+                    ))}
                   </select>
-                  {noteForm.category && categories.find(c => c.id == noteForm.category) && (
-                    <div 
-                      className="w-6 h-6 rounded border"
-                      style={{ backgroundColor: categories.find(c => c.id == noteForm.category)?.color }}
-                    ></div>
-                  )}
-                </div>
-
-                {noteForm.category === 'new' && (
-                  <div className="mt-3 space-y-3 p-3 bg-gray-50 rounded">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        New Category Name
-                      </label>
+                  {noteForm.category === 'new' && (
+                    <>
                       <input
                         type="text"
+                        placeholder="Category name"
                         value={noteForm.newCategoryName}
-                        onChange={(e) => setNoteForm({ ...noteForm, newCategoryName: e.target.value })}
-                        className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        onChange={e => setNoteForm({ ...noteForm, newCategoryName: e.target.value })}
+                        className="border border-gray-300 rounded px-2 py-1"
                       />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Color
-                      </label>
                       <input
                         type="color"
                         value={noteForm.newCategoryColor}
-                        onChange={(e) => setNoteForm({ ...noteForm, newCategoryColor: e.target.value })}
-                        className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        onChange={e => setNoteForm({ ...noteForm, newCategoryColor: e.target.value })}
+                        className="w-8 h-8 p-0 border-0"
                       />
-                    </div>
-                  </div>
-                )}
+                    </>
+                  )}
+                </div>
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Content
                 </label>
                 <textarea
                   value={noteForm.content}
-                  onChange={(e) => setNoteForm({ ...noteForm, content: e.target.value })}
+                  onChange={e => setNoteForm({ ...noteForm, content: e.target.value })}
+                  rows={5}
                   className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  rows="8"
                   required
                 />
               </div>
-
-              <div className="flex justify-between pt-4">
-                {editingNote && (
-                  <button
-                    type="button"
-                    onClick={() => deleteNote(editingNote.id)}
-                    className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 flex items-center space-x-2"
-                  >
-                    <Trash2 size={16} />
-                    <span>Delete</span>
-                  </button>
-                )}
-                <div className="flex space-x-2 ml-auto">
-                  <button
-                    type="button"
-                    onClick={() => setShowNoteModal(false)}
-                    className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                  >
-                    Save
-                  </button>
-                </div>
+              <div className="flex justify-end">
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                >
+                  {editingNote ? 'Update Note' : 'Add Note'}
+                </button>
               </div>
             </form>
           </div>
         </div>
       )}
-
       {showCategoryModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-96 max-w-md mx-4">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold">Add Category</h2>
+              <h2 className="text-lg font-semibold">Create Category</h2>
               <button
                 onClick={() => setShowCategoryModal(false)}
                 className="text-gray-400 hover:text-gray-600"
@@ -572,21 +517,19 @@ const NotesApp = () => {
                 <X size={20} />
               </button>
             </div>
-
             <form onSubmit={handleCategorySubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Category Name
+                  Name
                 </label>
                 <input
                   type="text"
                   value={categoryForm.name}
-                  onChange={(e) => setCategoryForm({ ...categoryForm, name: e.target.value })}
+                  onChange={e => setCategoryForm({ ...categoryForm, name: e.target.value })}
                   className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 />
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Color
@@ -594,24 +537,16 @@ const NotesApp = () => {
                 <input
                   type="color"
                   value={categoryForm.color}
-                  onChange={(e) => setCategoryForm({ ...categoryForm, color: e.target.value })}
-                  className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  onChange={e => setCategoryForm({ ...categoryForm, color: e.target.value })}
+                  className="w-12 h-8 p-0 border-0"
                 />
               </div>
-
-              <div className="flex space-x-2 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setShowCategoryModal(false)}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded hover:bg-gray-50"
-                >
-                  Cancel
-                </button>
+              <div className="flex justify-end">
                 <button
                   type="submit"
-                  className="flex-1 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                  className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors"
                 >
-                  Save
+                  Create
                 </button>
               </div>
             </form>

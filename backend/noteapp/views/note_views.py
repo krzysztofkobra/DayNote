@@ -62,19 +62,28 @@ def add_or_update_note(request, note_id=None):
 def delete_note(request, note_id):
     try:
         Note.objects.get(id=note_id, user=request.user).delete()
+        return Response({'status': 'ok'})
     except Note.DoesNotExist:
-        pass
-    return Response({'status': 'ok'})
+        return Response({'status': 'error', 'message': 'Note not found'}, status=status.HTTP_404_NOT_FOUND)
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def create_category(request):
     name = request.data.get('name')
     color = request.data.get('color')
-    if name and color:
-        NoteCategory.objects.create(name=name, color=color, user=request.user)
-        return Response({'status': 'ok'})
-    return Response({'status': 'error', 'message': 'Missing name or color'}, status=status.HTTP_400_BAD_REQUEST)
+
+    if not name:
+        return Response({'status': 'error', 'message': 'Name is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+    if not color:
+        color = '#cccccc'
+
+    try:
+        category = NoteCategory.objects.create(name=name, color=color, user=request.user)
+        serializer = NoteCategorySerializer(category)
+        return Response({'status': 'ok', 'category': serializer.data})
+    except Exception as e:
+        return Response({'status': 'error', 'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['DELETE'])
@@ -87,7 +96,6 @@ def delete_category(request, category_id):
         return Response({'status': 'ok'})
     except NoteCategory.DoesNotExist:
         return Response({'status': 'error', 'message': 'Category not found'}, status=status.HTTP_404_NOT_FOUND)
-
 
 
 @api_view(['POST'])

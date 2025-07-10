@@ -1,8 +1,10 @@
 from django.urls import path
-from .views import account_views, calendar_views, auth_views, note_views, settings_views
+from .views import account_views, calendar_views, auth_views, note_views, settings_views, csrf_view
 
 
 urlpatterns = [
+    path('csrf/', csrf_view.csrf),
+
     path('', calendar_views.calendar_view, name='home'),
     path('event/', calendar_views.event_view, name='event'),
     path('event/<int:event_id>/', calendar_views.event_view, name='event_with_id'),
@@ -16,6 +18,7 @@ urlpatterns = [
     path('accounts/profile/', account_views.account_view, name='account'),
     path('user/', account_views.current_user),
     path('accounts/delete/', account_views.delete_account_view, name='delete_account'),
+    path('accounts/profile/update/', account_views.update_profile_view, name='update_profile'),
 
     path('notes/', note_views.notes_view, name='notes'),
     path('notes/note/', note_views.add_or_update_note, name='add_note'),

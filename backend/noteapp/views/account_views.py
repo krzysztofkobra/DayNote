@@ -7,27 +7,41 @@ from rest_framework import status
 from ..forms import UserProfileForm
 from ..models import UserProfile, Event, Note, NoteCategory
 
-@api_view(["GET", "POST"])
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def update_profile_view(request):
+    profile, _ = UserProfile.objects.get_or_create(user=request.user)
+
+    form = UserProfileForm(request.data, request.FILES, instance=profile)
+    if form.is_valid():
+        form.save()
+        return Response({"status": "updated"})
+    return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def account_view(request):
     profile, _ = UserProfile.objects.get_or_create(user=request.user)
-    if request.method == "POST":
-        form = UserProfileForm(request.data, request.FILES, instance=profile)
-        if form.is_valid():
-            form.save()
-            return Response({"status": "updated"})
-        return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
-    else:
-        return Response({
-            "username": request.user.username,
-            "email": request.user.email,
-            "first_name": request.user.first_name,
-            "last_name": request.user.last_name,
-            "profile": {
-                "avatar": profile.avatar.url if profile.avatar else None,
-                "google_connected": profile.google_connected
-            }
-        })
+
+    avatar_url = None
+    if profile.avatar:
+        try:
+            avatar_url = profile.avatar.url
+        except (ValueError, FileNotFoundError):
+            # Avatar file doesn't exist, use default
+            avatar_url = None
+
+    return Response({
+        "username": request.user.username,
+        "email": request.user.email,
+        "first_name": request.user.first_name,
+        "last_name": request.user.last_name,
+        "date_joined": request.user.date_joined.strftime("%B %d, %Y"),
+        "profile": {
+            "avatar": avatar_url,
+            "google_connected": profile.google_connected
+        }
+    })
 
 @api_view(["GET", "POST"])
 @permission_classes([IsAuthenticated])
@@ -61,8 +75,15 @@ def delete_account_view(request):
 def current_user(request):
     user = request.user
     profile = getattr(user, 'profile', None)
-    avatar_url = profile.avatar.url if profile and profile.avatar else ''
+
+    avatar_url = ''
+    if profile and profile.avatar:
+        try:
+            avatar_url = profile.avatar.url
+        except (ValueError, FileNotFoundError):
+            avatar_url = ''
+
     return Response({
         'username': user.username,
         'avatar': avatar_url,
-})
+    })

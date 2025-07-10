@@ -5,4 +5,4 @@ class NoteappConfig(AppConfig):
     name = 'noteapp'
 
     def ready(self):
-        pass
+        import noteapp.signals
