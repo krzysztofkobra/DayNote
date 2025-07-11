@@ -12,6 +12,7 @@ class NoteCategorySerializer(serializers.ModelSerializer):
         fields = ["id", "name", "color"]
 
 class NoteSerializer(serializers.ModelSerializer):
+    category = NoteCategorySerializer(read_only=True)
     class Meta:
         model = Note
         fields = ["id", "title", "content", "category", "updated_at"]

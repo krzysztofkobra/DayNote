@@ -180,7 +180,7 @@ export default function AccountPage() {
           </div>
         </nav>
         <div className="p-4 border-t">
-          <a href="#" className="flex items-center space-x-3 p-3 bg-blue-100 text-blue-600 rounded-lg">
+          <a href="/" className="flex items-center space-x-3 p-3 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
             <Settings size={20} />
             <span>Settings</span>
           </a>
