@@ -55,9 +55,10 @@ def auth_receiver(request):
 def register_view(request):
     form = RegisterForm(request.data)
     if form.is_valid():
-        username = form.cleaned_data.get("username")
-        password = form.cleaned_data.get("password")
-        user = User.objects.create_user(username=username, password=password)
+        username = form.cleaned_data.get('username')
+        email = form.cleaned_data.get('email')
+        password = form.cleaned_data.get('password')
+        user = User.objects.create_user(username=username, email=email, password=password)
         login(request, user)
         return Response({'status': 'ok'})
     return Response({'errors': form.errors}, status=400)

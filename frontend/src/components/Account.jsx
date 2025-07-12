@@ -33,7 +33,7 @@ export default function AccountPage() {
 
   const fetchUserData = async () => {
     try {
-      const response = await fetch('api/accounts/profile/', {
+      const response = await fetch('http://localhost:8000/api/accounts/profile/', {
         method: 'GET',
         credentials: 'include',
         headers: {

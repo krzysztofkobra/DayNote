@@ -28,7 +28,6 @@ def account_view(request):
         try:
             avatar_url = profile.avatar.url
         except (ValueError, FileNotFoundError):
-            # Avatar file doesn't exist, use default
             avatar_url = None
 
     return Response({

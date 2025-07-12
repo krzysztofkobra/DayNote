@@ -14,10 +14,14 @@ class RegisterForm(forms.ModelForm):
 
     class Meta:
         model = User
-        fields = ['username', 'password']
+        fields = ['username', 'email', 'password']  # added 'email' here
         widgets = {
             'username': forms.TextInput(attrs={
                 'placeholder': 'Username',
+                'class': 'form-control'
+            }),
+            'email': forms.EmailInput(attrs={
+                'placeholder': 'Email',
                 'class': 'form-control'
             }),
         }

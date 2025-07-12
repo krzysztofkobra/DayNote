@@ -4,7 +4,7 @@ from .models import Event, Note, NoteCategory, UserProfile
 class EventSerializer(serializers.ModelSerializer):
     class Meta:
         model = Event
-        fields = ["id", "title", "date", "color"]
+        fields = ["id", "title", "date", "color", "start_time", "end_time"]
 
 class NoteCategorySerializer(serializers.ModelSerializer):
     class Meta:

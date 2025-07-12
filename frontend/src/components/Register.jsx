@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 
 export default function Register() {
   const [username, setUsername] = useState('')
+  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [password2, setPassword2] = useState('')
   const [error, setError] = useState(null)
@@ -25,7 +26,12 @@ export default function Register() {
       return
     }
     const csrfToken = getCookie('csrftoken')
-    const payload = { username, password }
+    const payload = {
+      username,
+      email,
+      password,
+      password_confirm: password2,
+    }
 
     try {
       const res = await fetch('http://localhost:8000/api/register/', {
@@ -40,7 +46,7 @@ export default function Register() {
       if (res.ok) {
         const data = await res.json()
         if (data.status === 'ok') {
-          window.location.href = '/login'
+          window.location.href = '/'
         } else {
           setError(data.error || 'Registration failed')
         }
@@ -95,6 +101,11 @@ export default function Register() {
               <label htmlFor="username" className="form-label">Username</label>
               <input type="text" id="username" name="username" className="form-control"
                 value={username} onChange={e => setUsername(e.target.value)} required autoFocus />
+            </div>
+            <div className="mb-3">
+              <label htmlFor="email" className="form-label">Email</label>
+              <input type="email" id="email" name="email" className="form-control"
+                value={email} onChange={e => setEmail(e.target.value)} required />
             </div>
             <div className="mb-3">
               <label htmlFor="password" className="form-label">Password</label>

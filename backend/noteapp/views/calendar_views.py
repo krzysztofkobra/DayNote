@@ -87,16 +87,9 @@ def calendar_view(request):
 @api_view(['GET', 'POST', 'PUT', 'DELETE'])
 @permission_classes([IsAuthenticated])
 def event_view(request, event_id=None):
-    print(f"Method: {request.method}")
-    print(f"User: {request.user}")
-    print(f"Cookies: {request.COOKIES}")
-    print(f"Headers: {request.headers}")
-    print(f"Data: {request.data}")
-
     if request.method == 'GET':
         start = request.GET.get('start')
         end = request.GET.get('end')
-        print(f"GET params - start: {start}, end: {end}")
         if not start or not end:
             return Response({'error': 'start and end parameters are required'}, status=400)
 
@@ -109,7 +102,9 @@ def event_view(request, event_id=None):
             'id': e.id,
             'title': e.title,
             'date': e.date.strftime('%Y-%m-%d'),
-            'color': e.color
+            'color': e.color,
+            'start_time': e.start_time.strftime('%H:%M') if e.start_time else '',
+            'end_time': e.end_time.strftime('%H:%M') if e.end_time else ''
         } for e in events]
 
         return Response(result)
@@ -118,32 +113,48 @@ def event_view(request, event_id=None):
         title = request.data.get('title')
         date_str = request.data.get('date')
         color = request.data.get('color')
-        print(f"POST/PUT data - title: {title}, date: {date_str}, color: {color}, event_id: {event_id}")
+        start_time_str = request.data.get('start_time')
+        end_time_str = request.data.get('end_time')
 
         try:
             event_date = datetime.strptime(date_str, '%Y-%m-%d').date()
         except Exception as e:
             print(f"Date parsing error: {e}")
-            return Response({'error': 'Invalid date format'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'Invalid date format'}, status=400)
+
+        try:
+            start_time = datetime.strptime(start_time_str, '%H:%M').time() if start_time_str else time(0, 1)
+            end_time = datetime.strptime(end_time_str, '%H:%M').time() if end_time_str else time(23, 59)
+        except Exception as e:
+            print(f"Time parsing error: {e}")
+            return Response({'error': 'Invalid time format'}, status=400)
 
         if request.method == 'POST':
             event_id_post = request.data.get('event_id')
-            print(f"POST event_id in data: {event_id_post}")
             if event_id_post:
                 try:
                     event = Event.objects.get(id=event_id_post, user=request.user)
                     event.title = title
                     event.date = event_date
                     event.color = color
+                    event.start_time = start_time
+                    event.end_time = end_time
                     event.save()
                     serializer = EventSerializer(event)
-                    return Response(serializer.data, status=status.HTTP_200_OK)
+                    return Response(serializer.data, status=200)
                 except Event.DoesNotExist:
-                    return Response({'error': 'Event not found'}, status=status.HTTP_404_NOT_FOUND)
+                    return Response({'error': 'Event not found'}, status=404)
             else:
-                event = Event.objects.create(title=title, date=event_date, color=color, user=request.user)
+                event = Event.objects.create(
+                    title=title,
+                    date=event_date,
+                    color=color,
+                    start_time=start_time,
+                    end_time=end_time,
+                    user=request.user
+                )
                 serializer = EventSerializer(event)
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
+                return Response(serializer.data, status=201)
 
         elif request.method == 'PUT':
             if not event_id:
@@ -152,12 +163,14 @@ def event_view(request, event_id=None):
             event.title = title
             event.date = event_date
             event.color = color
+            event.start_time = start_time
+            event.end_time = end_time
             event.save()
-            return Response({'status': 'ok'})
+            serializer = EventSerializer(event)
+            return Response(serializer.data, status=200)
 
     elif request.method == 'DELETE':
         event_id_delete = request.GET.get('event_id')
-        print(f"DELETE event_id: {event_id_delete}")
         if not event_id_delete:
             return Response({'error': 'event_id is required'}, status=400)
 
