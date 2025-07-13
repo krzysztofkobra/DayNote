@@ -3,8 +3,12 @@ import React, { useState, useEffect } from 'react'
 import Swal from 'sweetalert2'
 import { HexColorPicker } from "react-colorful"
 import { Calendar, Settings, StickyNote, Filter, Plus, Edit, Trash2, X, Tag } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
+
+const BASE_URL = 'http://localhost:8000';
 
 const NotesApp = () => {
+  const { t } = useTranslation()
   const [notes, setNotes] = useState([])
   const [categories, setCategories] = useState([])
   const [filteredNotes, setFilteredNotes] = useState([])
@@ -57,14 +61,14 @@ const NotesApp = () => {
 
   const fetchNotesAndCategories = async () => {
     try {
-      const res = await fetch('http://localhost:8000/api/notes/', { credentials: 'include' })
+      const res = await fetch(`http://localhost:8000/api/notes/`, { credentials: 'include' })
       if (res.ok) {
-        const data = await res.json()
-        setNotes(data.notes || [])
-        setCategories(data.categories?.sort((a, b) => a.name.localeCompare(b.name)) || [])
+        const d = await res.json()
+        setNotes(d.notes||[])
+        setCategories((d.categories||[]).sort((a,b)=>a.name.localeCompare(b.name)))
       }
     } catch {
-      showSwal('error', 'Failed to fetch notes')
+      Swal.fire({ icon:'error', title:t('Failed to fetch notes'), toast:true, position:'top-end', timer:1600 })
     }
   }
 
@@ -123,7 +127,7 @@ const NotesApp = () => {
   const handleNoteSubmit = async e => {
     e.preventDefault()
     if (noteForm.category === 'new' && !noteForm.newCategoryName.trim()) {
-      showSwal('error', 'Category name required!')
+      showSwal('error', t('Category name required!'))
       return
     }
     if (noteForm.category === 'autocategorize') {
@@ -153,12 +157,12 @@ const NotesApp = () => {
       if (res.ok) {
         await fetchNotesAndCategories()
         setShowNoteModal(false)
-        showSwal('success', editingNote ? 'Note updated 🎉' : 'Note created 🎉')
+        showSwal('success', editingNote ? t('Note updated 🎉') : t('Note created 🎉'))
       } else {
-        showSwal('error', 'Failed to save note')
+        showSwal('error', t('Failed to save note'))
       }
     } catch {
-      showSwal('error', 'Failed to save note')
+      showSwal('error', t('Failed to save note'))
     }
   }
 
@@ -173,23 +177,23 @@ const NotesApp = () => {
       if (res.ok) {
         await fetchNotesAndCategories()
         setShowNoteModal(false)
-        showSwal('success', 'Autocategorized!')
+        showSwal('success', t('Autocategorize'))
       } else {
-        showSwal('error', 'Could not autocategorize')
+        showSwal('error', t('Could not autocategorize'))
       }
     } catch {
-      showSwal('error', 'Could not autocategorize')
+      showSwal('error', t('Could not autocategorize'))
     }
   }
 
   const deleteNote = async noteId => {
     const confirm = await Swal.fire({
-      title: 'Delete note?',
-      text: 'This action cannot be undone',
+      title: t('Delete note?'),
+      text: t('This action cannot be undone'),
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel'
+      confirmButtonText: t('Delete'),
+      cancelButtonText: t('Cancel')
     })
     if (!confirm.isConfirmed) return
     try {
@@ -200,17 +204,17 @@ const NotesApp = () => {
       })
       if (res.ok) {
         await fetchNotesAndCategories()
-        showSwal('info', 'Note deleted')
+        showSwal('info', t('Note deleted'))
       }
     } catch {
-      showSwal('error', 'Failed to delete note')
+      showSwal('error', t('Failed to delete note'))
     }
   }
 
   const handleCategorySubmit = async e => {
     e.preventDefault()
     if (!categoryForm.name.trim()) {
-      showSwal('error', 'Category name required!')
+      showSwal('error', t('Category name required!'))
       return
     }
     try {
@@ -230,12 +234,12 @@ const NotesApp = () => {
         await fetchNotesAndCategories()
         setShowCategoryModal(false)
         setCategoryForm({ name: '', color: '#ff0000' })
-        showSwal('success', 'Category created!')
+        showSwal('success', t('Category created!'))
       } else {
-        showSwal('error', 'Failed to create category')
+        showSwal('error', t('Failed to create category'))
       }
     } catch {
-      showSwal('error', 'Failed to create category')
+      showSwal('error', t('Failed to create category'))
     }
   }
 
@@ -248,10 +252,10 @@ const NotesApp = () => {
       })
       if (res.ok) {
         await fetchNotesAndCategories()
-        showSwal('success', 'Removed category from note')
+        showSwal('success', t('Removed category from note'))
       }
     } catch {
-      showSwal('error', 'Failed to remove category')
+      showSwal('error', t('Failed to remove category'))
     }
   }
 
@@ -264,10 +268,10 @@ const NotesApp = () => {
       })
       if (res.ok) {
         await fetchNotesAndCategories()
-        showSwal('success', 'All notes have been beautifully categorized! 🚀')
+        showSwal('success', t('All notes have been beautifully categorized! 🚀'))
       }
     } catch {
-      showSwal('error', 'Failed to autocategorize!')
+      showSwal('error', t('Failed to autocategorize!'))
     }
   }
 
@@ -306,15 +310,15 @@ const NotesApp = () => {
           <div className="space-y-2">
             <a href="/" className="flex items-center space-x-3 p-3 text-gray-600 hover:bg-gray-100 rounded-lg">
               <Calendar size={20} />
-              <span>Calendar</span>
+              <span>{t("Calendar")}</span>
             </a>
             <a href="#" className="flex items-center space-x-3 p-3 text-blue-600 bg-blue-50 font-semibold rounded-lg transition-colors">
               <StickyNote size={20} />
-              <span>Notes</span>
+              <span>{t("Notes")}</span>
             </a>
           </div>
           <div className="mt-6">
-            <div className="text-sm font-medium text-gray-700 mb-3">Filter Options</div>
+            <div className="text-sm font-medium text-gray-700 mb-3">{t("Filter Options")}</div>
             <div className="flex items-center space-x-2 mb-3">
               <Filter size={16} className="text-gray-500" />
               <select
@@ -322,20 +326,21 @@ const NotesApp = () => {
                 onChange={e => setSortBy(e.target.value)}
                 className="text-sm border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <option value="last-edit">Last Edit</option>
-                <option value="az">A-Z</option>
-                <option value="za">Z-A</option>
+                <option value="last-edit">{t("Last Edit")}</option>
+                <option value="az">{t("A-Z")}</option>
+                <option value="za">{t("Z-A")}</option>
+                <option value="by-category">{t("By Category")}</option>
               </select>
             </div>
             <div className="space-y-2">
-              <div className="text-sm font-medium text-gray-700">Categories</div>
+              <div className="text-sm font-medium text-gray-700">{t("Categories")}</div>
               <label className="flex items-center space-x-2 text-sm">
                 <input
                   type="checkbox"
                   checked={selectedCategories.includes('none')}
                   onChange={() => handleCategoryFilter('none')}
                 />
-                <span>Uncategorized</span>
+                <span>{t("Uncategorized")}</span>
               </label>
               {categories.map(category => (
                 <label key={category.id} className="flex items-center space-x-2 text-sm">
@@ -357,33 +362,33 @@ const NotesApp = () => {
         <div className="p-4 border-t">
           <a href="/settings" className="flex items-center space-x-3 p-3 text-gray-600 hover:bg-gray-100 rounded-lg">
             <Settings size={20} />
-            <span>Settings</span>
+            <span>{t("Settings")}</span>
           </a>
         </div>
       </div>
       <div className="flex-1 flex flex-col">
         <div className="flex items-center justify-between p-6 bg-white border-b">
-          <h1 className="text-2xl font-bold text-gray-700">My Notes</h1>
+          <h1 className="text-2xl font-bold text-gray-700">{t("My Notes")}</h1>
           <div className="flex items-center space-x-3">
             <button
               onClick={autocategorizeAll}
               className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
             >
-              Autocategorize All
+              {t("Autocategorize All")}
             </button>
             <button
               onClick={() => setShowCategoryModal(true)}
               className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors flex items-center space-x-2"
             >
               <Tag size={16} />
-              <span>Create Category</span>
+              <span>{t("Create Category")}</span>
             </button>
             <button
               onClick={() => openNoteModal()}
               className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center space-x-2"
             >
               <Plus size={16} />
-              <span>Add Note</span>
+              <span>{t("Add Note")}</span>
             </button>
           </div>
         </div>
@@ -392,7 +397,7 @@ const NotesApp = () => {
             <div className="flex flex-col items-center justify-center h-full text-gray-500">
               <StickyNote size={64} className="mb-4" />
               <p className="text-lg mb-4">
-                {notes.length === 0 ? "You don't have any notes yet." : "No notes match your filters."}
+                {notes.length === 0 ? t("You don't have any notes yet.") : t("No notes match your filters.")}
               </p>
             </div>
           ) : (
@@ -412,13 +417,13 @@ const NotesApp = () => {
                     }}
                   >
                     <span className="text-xs font-bold text-white tracking-wide uppercase overflow-hidden whitespace-nowrap text-ellipsis" style={{maxWidth:"95%"}}>
-                      {note.category ? note.category.name : "Uncategorized"}
+                      {note.category ? note.category.name : t("Uncategorized")}
                     </span>
                     {note.category && (
                       <button
                         onClick={() => removeCategoryFromNote(note.id)}
                         className="ml-auto rounded-full p-0.5"
-                        title="Remove category"
+                        title={t("Remove category")}
                         style={{
                           background: 'none',
                           lineHeight: 0,
@@ -431,19 +436,19 @@ const NotesApp = () => {
                     )}
                   </div>
                   <p className="text-gray-600 text-sm mb-4 line-clamp-3 flex-1">{note.content}</p>
-                  <div className="text-xs text-gray-400 mb-3 mt-auto">Last updated: {formatDate(note.updated_at)}</div>
+                  <div className="text-xs text-gray-400 mb-3 mt-auto">{t("Last updated:")}: {formatDate(note.updated_at)}</div>
                   <div className="flex items-end justify-end space-x-2 mt-auto">
                     <button
                       onClick={() => openNoteModal(note)}
                       className="p-2 bg-blue-100 text-blue-600 hover:bg-blue-200 transition rounded-lg"
-                      title="Edit note"
+                      title={t("Edit Note")}
                     >
                       <Edit size={16} />
                     </button>
                     <button
                       onClick={() => deleteNote(note.id)}
                       className="p-2 bg-red-100 text-red-600 hover:bg-red-200 transition rounded-lg"
-                      title="Delete note"
+                      title={t("Delete note?")}
                     >
                       <Trash2 size={16} />
                     </button>
@@ -464,10 +469,10 @@ const NotesApp = () => {
         >
           <div className="bg-white rounded-lg py-8 px-6 w-full max-w-lg mx-4 max-h-screen overflow-y-auto shadow-2xl border-2 border-blue-100 flex flex-col items-center">
             <div className="flex justify-between items-center w-full mb-4">
-              <h2 className="text-lg font-semibold text-gray-1000">{editingNote ? 'Edit Note' : 'Add Note'}</h2>
+              <h2 className="text-lg font-semibold text-gray-1000">{editingNote ? t('Edit Note') : t('Add Note')}</h2>
               <button
                 onClick={() => setShowNoteModal(false)}
-                title="Close"
+                title={t("Cancel")}
                 className="p-1 rounded bg-gray-300 hover:bg-gray-400 transition-colors"
                 style={{ border: 'none', color: '#111', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
               >
@@ -477,7 +482,7 @@ const NotesApp = () => {
             <form onSubmit={handleNoteSubmit} className="w-full max-w-md space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Title
+                  {t("Title")}
                 </label>
                 <input
                   type="text"
@@ -489,7 +494,7 @@ const NotesApp = () => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Category
+                  {t("Category")}
                 </label>
                 <div className="flex flex-wrap items-center gap-2">
                   <select
@@ -497,9 +502,9 @@ const NotesApp = () => {
                     onChange={e => setNoteForm({ ...noteForm, category: e.target.value })}
                     className="border border-gray-300 rounded px-2 py-1"
                   >
-                    <option value="">None</option>
-                    <option value="new">+ New Category</option>
-                    <option value="autocategorize">Autocategorize</option>
+                    <option value="">{t("None")}</option>
+                    <option value="new">{t("+ New Category")}</option>
+                    <option value="autocategorize">{t("Autocategorize")}</option>
                     {categories.map(cat => (
                       <option key={cat.id} value={cat.id}>{cat.name}</option>
                     ))}
@@ -508,7 +513,7 @@ const NotesApp = () => {
                     <div className="flex flex-col sm:flex-row items-start gap-3 bg-gray-100 px-2 py-2 rounded border mt-1 w-full sm:w-auto">
                       <input
                         type="text"
-                        placeholder="Category name"
+                        placeholder={t("Name")}
                         value={noteForm.newCategoryName}
                         onChange={e =>
                           setNoteForm({ ...noteForm, newCategoryName: e.target.value })
@@ -529,7 +534,7 @@ const NotesApp = () => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Content
+                  {t("Content")}
                 </label>
                 <textarea
                   value={noteForm.content}
@@ -544,7 +549,7 @@ const NotesApp = () => {
                   type="submit"
                   className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
                 >
-                  {editingNote ? 'Update Note' : 'Add Note'}
+                  {editingNote ? t('Update Note') : t('Add Note')}
                 </button>
               </div>
             </form>
@@ -560,10 +565,10 @@ const NotesApp = () => {
         >
           <div className="bg-white rounded-lg py-8 px-6 w-full max-w-sm mx-4 shadow-2xl border-2 border-purple-100 flex flex-col items-center">
             <div className="flex justify-between items-center w-full mb-4">
-              <h2 className="text-lg font-semibold text-gray-700 w-full text-left">Create Category</h2>
+              <h2 className="text-lg font-semibold text-gray-700 w-full text-left">{t("Create Category")}</h2>
               <button
                 onClick={() => setShowCategoryModal(false)}
-                title="Close"
+                title={t("Cancel")}
                 className="p-1 rounded bg-gray-300 hover:bg-gray-400 transition-colors"
                 style={{ border: 'none', color: '#111', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
               >
@@ -573,7 +578,7 @@ const NotesApp = () => {
             <form onSubmit={handleCategorySubmit} className="w-full max-w-xs space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Name
+                  {t("Name")}
                 </label>
                 <input
                   type="text"
@@ -585,7 +590,7 @@ const NotesApp = () => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Color
+                  {t("Color")}
                 </label>
                 <div className="flex items-center gap-2">
                   <HexColorPicker
@@ -606,7 +611,7 @@ const NotesApp = () => {
                   type="submit"
                   className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors"
                 >
-                  Create
+                  {t("Create")}
                 </button>
               </div>
             </form>

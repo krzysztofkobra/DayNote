@@ -6,6 +6,7 @@ import Notes from './components/Notes'
 import Account from './components/Account'
 import Logout from './components/Logout'
 import SettingsPage from './components/Settings'
+import './i18n'
 
 function App() {
   return (
