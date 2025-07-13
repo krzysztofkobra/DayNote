@@ -9,7 +9,8 @@ const BASE_URL = 'http://localhost:8000'
 
 const CalendarApp = () => {
   const [currentDate, setCurrentDate] = useState(new Date())
-  const [view, setView] = useState('month')
+  const [view, setView] = useState(() => localStorage.getItem('calendarView') || 'month');
+  const [timezone, setTimezone] = useState(() => localStorage.getItem("timezone") || "Europe/Warsaw");
   const [events, setEvents] = useState([])
   const [showEventModal, setShowEventModal] = useState(false)
   const [showMoreEventsModal, setShowMoreEventsModal] = useState(false)
@@ -43,7 +44,6 @@ const CalendarApp = () => {
 
   const HOURS_IN_DAY = 24
   const HOUR_HEIGHT = 60
-  const TIMEZONE = "Europe/Warsaw"
 
   const timeToMinutes = (timeStr) => {
     if (!timeStr) return 0
@@ -72,11 +72,12 @@ const CalendarApp = () => {
 
   useEffect(() => {
     fetchCsrfToken()
+    fetchUser()
   }, [])
 
   useEffect(() => {
-    fetchUser()
-  }, [])
+    localStorage.setItem('calendarView', view);
+  }, [view]);
 
   useEffect(() => {
     if (!loadingUser) {
@@ -88,8 +89,8 @@ const CalendarApp = () => {
   if (view === 'day' && scrollRef.current) {
     const getCurrentTimeInTimezone = () => {
       const now = new Date()
-      if (TIMEZONE && TIMEZONE !== 'local') {
-        return new Date(now.toLocaleString("en-US", {timeZone: TIMEZONE}))
+      if (timezone && timezone !== 'local') {
+        return new Date(now.toLocaleString("en-US", {timeZone: timezone}))
       }
       return now
     }
@@ -264,7 +265,6 @@ const generateCalendarDays = () => {
       .sort((a, b) => a.start_time.localeCompare(b.start_time))
   }
 
-  // Funkcja do formatowania daty bez przesunięć timezone
   const formatDateString = (date) => {
     const year = date.getFullYear()
     const month = String(date.getMonth() + 1).padStart(2, '0')
@@ -486,7 +486,7 @@ const generateCalendarDays = () => {
             >
               <div
                 className={`
-                w-8 h-8 flex items-center justify-center rounded-full
+                w-8 h-8 flex items-center justify-center rounded-xl
                 ${day.isToday ? 'bg-blue-600 text-white' : 'hover:bg-gray-100'}
                 transition
                 self-start
@@ -519,7 +519,7 @@ const generateCalendarDays = () => {
                       e.stopPropagation()
                       showMoreEvents(day.fullDate)
                     }}
-                    className="text-xs text-blue-600 hover:underline mt-auto self-start"
+                    className="text-xs text-white mt-auto self-start w-full py-1"
                   >
                     +{day.events.length - 3} more
                   </button>
@@ -594,58 +594,82 @@ const generateCalendarDays = () => {
     )
   }
 
-  const renderDayView = () => {
-  const day = calendarDays[0]
-  const eventStyles = (event) => {
-    const startM = timeToMinutes(event.start_time)
-    let endM = timeToMinutes(event.end_time)
-    
-    if (!event.end_time || endM <= startM) endM = startM + 30
-    
-    const top = (startM / 60) * HOUR_HEIGHT
-    const height = ((endM - startM) / 60) * HOUR_HEIGHT
-    return {
-      top: `${top}px`,
-      height: `${Math.max(height, HOUR_HEIGHT * 0.25)}px`
+const renderDayView = () => {
+  const day = calendarDays[0];
+  const containerHeight = HOURS_IN_DAY * HOUR_HEIGHT;
+  const currentTime = (() => {
+    const now = new Date();
+    if (timezone && timezone !== 'local') {
+      return new Date(now.toLocaleString("en-US", { timeZone: timezone }));
     }
-  }
-  
-  const onTimeSlotClick = (hour, minute = 0) => {
-    const hh = hour.toString().padStart(2, '0')
-    const mm = minute.toString().padStart(2, '0')
-    const timeStr = `${hh}:${mm}`
-    openEventModal(day.fullDate, timeStr)
-  }
-  
-  const getCurrentTimeInTimezone = () => {
-    const now = new Date()
-    if (TIMEZONE && TIMEZONE !== 'local') {
-      return new Date(now.toLocaleString("en-US", {timeZone: TIMEZONE}))
+    return now;
+  })();
+  const nowMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
+  const currentLineTop = (nowMinutes / 60) * HOUR_HEIGHT;
+
+  const getEventPositions = (events) => {
+    const validEvents = events.filter(event => {
+      return event.start_time && event.start_time !== '';
+    });
+    
+    const sortedEvents = [...validEvents].sort((a, b) => {
+      const startA = timeToMinutes(a.start_time);
+      const startB = timeToMinutes(b.start_time);
+      return startA - startB;
+    });
+
+    const positions = [];
+    
+    for (const event of sortedEvents) {
+      const startM = timeToMinutes(event.start_time);
+      let endM = event.end_time && event.end_time !== '' ? timeToMinutes(event.end_time) : startM + 30;
+      if (endM <= startM) endM = startM + 30;
+
+      let column = 0;
+      let maxColumns = 1;
+      
+      while (positions.some(pos => 
+        pos.column === column && 
+        pos.startM < endM && 
+        pos.endM > startM
+      )) {
+        column++;
+        maxColumns = Math.max(maxColumns, column + 1);
+      }
+
+      positions.push({
+        ...event,
+        startM,
+        endM,
+        column,
+        maxColumns
+      });
     }
-    return now
-  }
-  
-  const currentTime = getCurrentTimeInTimezone()
-  const nowMinutes = currentTime.getHours() * 60 + currentTime.getMinutes()
-  const currentLineTop = (nowMinutes / 60) * HOUR_HEIGHT
-  const containerHeight = HOURS_IN_DAY * HOUR_HEIGHT
-  
+
+    positions.forEach(pos => {
+      const overlappingEvents = positions.filter(other => 
+        other.startM < pos.endM && other.endM > pos.startM
+      );
+      const totalColumns = Math.max(...overlappingEvents.map(e => e.column)) + 1;
+      pos.maxColumns = totalColumns;
+    });
+
+    return positions;
+  };
+
+  const eventPositions = getEventPositions(day.events);
+
   return (
     <div className="w-full h-full bg-white rounded-lg shadow-md flex flex-col">
       <div className="border-b border-gray-200 p-4 flex items-center justify-between flex-shrink-0">
         <h2 className="text-xl font-semibold text-gray-900">
-          {day.date.toLocaleDateString(undefined, {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-          })}
+          {day.date.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
         </h2>
       </div>
       <div className="flex-1 min-h-0 overflow-hidden">
         <div
           ref={scrollRef}
-          className="h-full flex flex-row border-t border-gray-200 select-none overflow-y-auto"
+          className="h-full flex flex-row border-t border-gray-200 select-none overflow-y-auto relative"
           style={{ maxHeight: 'calc(100vh - 173px)' }}
         >
           <div
@@ -662,60 +686,67 @@ const generateCalendarDays = () => {
               </div>
             ))}
           </div>
-          <div className="relative flex-1 min-w-0">
-            <div className="relative" style={{ height: containerHeight, position: 'relative' }}>
-              {[...Array(HOURS_IN_DAY).keys()].map(hour => (
-                <div
-                  key={hour}
-                  className="border-t border-gray-200 hover:bg-blue-50 cursor-pointer"
-                  style={{ height: HOUR_HEIGHT }}
-                  onClick={() => onTimeSlotClick(hour, 0)}
-                />
-              ))}
-              {day.events.map(event => {
-                const startM = timeToMinutes(event.start_time)
-                let endM = timeToMinutes(event.end_time)
-                if (!event.end_time || endM <= startM) endM = startM + 30
-                const top = (startM / 60) * HOUR_HEIGHT
-                const height = ((endM - startM) / 60) * HOUR_HEIGHT
-
-                return (
-                  <div
-                    key={event.id}
-                    onClick={e => {
-                      e.stopPropagation()
-                      editEvent(event)
-                    }}
-                    title={`${event.title} (${event.start_time || '...'} - ${event.end_time || '...'})`}
-                    className={`absolute w-full rounded-md shadow-md px-2 py-1 cursor-pointer overflow-hidden text-ellipsis ${getEventColor(event.color)}`}
-                    style={{ top, height, zIndex: 10, position: 'absolute' }}
-                  >
-                    <div className="font-medium text-sm leading-tight">{event.title}</div>
-                    <div className="text-[11px] opacity-70 leading-tight">
-                      {event.start_time} - {event.end_time || '—'}
-                    </div>
-                  </div>
-                )
-              })}
+          <div className="relative flex-1 min-w-0" style={{ height: containerHeight, position: 'relative' }}>
+            {[...Array(HOURS_IN_DAY).keys()].map(hour => (
               <div
-                className="absolute left-0 right-0 h-[2px] bg-red-500 z-20 pointer-events-none"
-                style={{ top: currentLineTop }}
+                key={hour}
+                className="border-b border-gray-200 hover:bg-blue-50 cursor-pointer"
+                style={{ height: HOUR_HEIGHT }}
+                onClick={() => {
+                  const hh = hour.toString().padStart(2, '0');
+                  openEventModal(day.fullDate, `${hh}:00`);
+                }}
               />
-            </div>
+            ))}
+            {eventPositions.map(event => {
+              const top = (event.startM / 60) * HOUR_HEIGHT;
+              const height = ((event.endM - event.startM) / 60) * HOUR_HEIGHT;
+              const width = `${100 / event.maxColumns}%`;
+              const left = `${(event.column * 100) / event.maxColumns}%`;
+              
+              return (
+                <div
+                  key={event.id}
+                  onClick={e => {
+                    e.stopPropagation();
+                    editEvent(event);
+                  }}
+                  title={`${event.title} (${event.start_time || '...'} - ${event.end_time || '...'})`}
+                  className={`absolute rounded-md shadow-md px-2 py-1 cursor-pointer overflow-hidden text-ellipsis ${getEventColor(event.color)}`}
+                  style={{ 
+                    top, 
+                    height, 
+                    width, 
+                    left, 
+                    zIndex: 10,
+                    marginRight: '1px'
+                  }}
+                >
+                  <div className="font-medium text-sm leading-tight">{event.title}</div>
+                  <div className="text-[11px] opacity-70 leading-tight">
+                    {event.start_time} - {event.end_time || '—'}
+                  </div>
+                </div>
+              );
+            })}
+            <div
+              className="absolute left-0 right-0 h-[2px] bg-red-500 z-20 pointer-events-none"
+              style={{ top: currentLineTop }}
+            />
           </div>
         </div>
       </div>
-      
     </div>
-  )
-}
+  );
+};
 
-  if (loadingUser)
+  if (loadingUser) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <RefreshCw className="animate-spin text-blue-500" size={40} />
       </div>
     )
+  }
 
   return (
     <div>
@@ -739,7 +770,7 @@ const generateCalendarDays = () => {
           </div>
           <nav className="flex-1 p-4">
             <div className="space-y-2">
-              <a href="/" className="flex items-center space-x-3 p-3 bg-blue-100 text-blue-600 rounded-lg">
+              <a href="/" className="flex items-center space-x-3 p-3 text-blue-600 bg-blue-50 font-semibold rounded-lg transition-colors">
                 <Calendar size={20} />
                 <span>Calendar</span>
               </a>
@@ -753,7 +784,7 @@ const generateCalendarDays = () => {
             </div>
           </nav>
           <div className="p-4 border-t">
-            <a href="#" className="flex items-center space-x-3 p-3 text-gray-600 hover:bg-gray-100 rounded-lg">
+            <a href="/settings" className="flex items-center space-x-3 p-3 text-gray-600 hover:bg-gray-100 rounded-lg">
               <Settings size={20} />
               <span>Settings</span>
             </a>

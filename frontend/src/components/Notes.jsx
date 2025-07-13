@@ -308,7 +308,7 @@ const NotesApp = () => {
               <Calendar size={20} />
               <span>Calendar</span>
             </a>
-            <a href="#" className="flex items-center space-x-3 p-3 bg-blue-100 text-blue-600 rounded-lg">
+            <a href="#" className="flex items-center space-x-3 p-3 text-blue-600 bg-blue-50 font-semibold rounded-lg transition-colors">
               <StickyNote size={20} />
               <span>Notes</span>
             </a>

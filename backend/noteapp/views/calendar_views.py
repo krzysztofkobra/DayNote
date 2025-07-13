@@ -42,7 +42,9 @@ def calendar_view(request):
             'id': event.id,
             'title': event.title,
             'date': date_str,
-            'color': event.color
+            'color': event.color,
+            'start_time': event.start_time.strftime('%H:%M') if event.start_time else '',
+            'end_time': event.end_time.strftime('%H:%M') if event.end_time else ''
         })
 
     calendar_days = []
@@ -98,14 +100,17 @@ def event_view(request, event_id=None):
             date__range=[start, end]
         ).order_by('date')
 
-        result = [{
-            'id': e.id,
-            'title': e.title,
-            'date': e.date.strftime('%Y-%m-%d'),
-            'color': e.color,
-            'start_time': e.start_time.strftime('%H:%M') if e.start_time else '',
-            'end_time': e.end_time.strftime('%H:%M') if e.end_time else ''
-        } for e in events]
+        result = []
+        for e in events:
+            print(f"Event: {e.title}, start_time: {e.start_time}, end_time: {e.end_time}")
+            result.append({
+                'id': e.id,
+                'title': e.title,
+                'date': e.date.strftime('%Y-%m-%d'),
+                'color': e.color,
+                'start_time': e.start_time.strftime('%H:%M') if e.start_time else '',
+                'end_time': e.end_time.strftime('%H:%M') if e.end_time else ''
+            })
 
         return Response(result)
 

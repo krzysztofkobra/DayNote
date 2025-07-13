@@ -235,7 +235,7 @@ export default function AccountPage() {
           </div>
         </nav>
         <div className="p-4 border-t">
-          <a href="/" className="flex items-center space-x-3 p-3 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+          <a href="/settings" className="flex items-center space-x-3 p-3 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
             <Settings size={20} />
             <span>Settings</span>
           </a>

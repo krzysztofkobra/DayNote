@@ -5,6 +5,7 @@ import CalendarApp from './components/Calendar'
 import Notes from './components/Notes'
 import Account from './components/Account'
 import Logout from './components/Logout'
+import SettingsPage from './components/Settings'
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
         <Route path="/notes" element={<Notes />} />
         <Route path="/account" element={<Account />} />
         <Route path="/logout" element={<Logout />} />
+        <Route path="/settings" element={<SettingsPage />} />
         <Route path="/" element={<CalendarApp />}/>
       </Routes>
     </Router>
