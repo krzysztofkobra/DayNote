@@ -50,6 +50,11 @@ const CalendarApp = () => {
     const [h, m] = timeStr.split(':').map(Number)
     return h * 60 + m
   }
+
+  const showSwal = (icon, title) => {
+      Swal.fire({ icon, title, timer: 1600, showConfirmButton: false, toast: true, position: 'top-end' })
+    }
+
   const fetchCsrfToken = async () => {
     await fetch(`${BASE_URL}/api/csrf/`, { credentials: 'include' })
   }
@@ -151,23 +156,12 @@ const CalendarApp = () => {
         })
       })
         setEvents(formattedEvents)
-        Swal.fire({
-          icon: 'success',
-          title: 'Events loaded',
-          timer: 1500,
-          showConfirmButton: false
-        })
+        // showSwal('success', 'Events loaded')
       } else {
-        Swal.fire({
-          icon: 'error',
-          title: 'Failed to load events'
-        })
+        showSwal('error', 'Failed to load events')
       }
     } catch {
-      Swal.fire({
-        icon: 'error',
-        title: 'Failed to load events'
-      })
+      showSwal('error', 'Failed to load events')
     } finally {
       setLoading(false)
     }
@@ -420,24 +414,33 @@ const generateCalendarDays = () => {
   }
 
   const deleteEvent = async eventId => {
-    if (window.confirm('Are you sure you want to delete this event?')) {
-      try {
-        setLoading(true)
-        await deleteEventFromServer(eventId)
-        await fetchEvents()
-        setShowEventModal(false)
-        setShowMoreEventsModal(false)
-      } catch {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'Failed to delete event. Please try again.'
-        })
-      } finally {
-        setLoading(false)
-      }
+  const result = await Swal.fire({
+    title: 'Are you sure?',
+    text: 'Do you really want to delete this event?',
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonText: 'Yes, delete it',
+    cancelButtonText: 'Cancel'
+  })
+
+  if (result.isConfirmed) {
+    try {
+      setLoading(true)
+      await deleteEventFromServer(eventId)
+      await fetchEvents()
+      setShowEventModal(false)
+      setShowMoreEventsModal(false)
+    } catch {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Failed to delete event. Please try again.'
+      })
+    } finally {
+      setLoading(false)
     }
   }
+}
 
   const getEventColor = colorValue => {
     switch (colorValue) {
@@ -643,7 +646,7 @@ const generateCalendarDays = () => {
         <div
           ref={scrollRef}
           className="h-full flex flex-row border-t border-gray-200 select-none overflow-y-auto"
-          style={{ maxHeight: 'calc(100vh - 172px)' }}
+          style={{ maxHeight: 'calc(100vh - 173px)' }}
         >
           <div
             className="flex flex-col bg-gray-50 border-r border-gray-200 flex-shrink-0"
@@ -821,7 +824,9 @@ const generateCalendarDays = () => {
               <h2 className="text-lg font-semibold">{editingEvent ? 'Edit Event' : 'Add Event'}</h2>
               <button
                 onClick={() => setShowEventModal(false)}
-                className="text-gray-400 hover:text-gray-600"
+                title="Close"
+                className="p-1 rounded bg-gray-300 hover:bg-gray-400 transition-colors"
+                style={{ border: 'none', color: '#111', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
               >
                 <X size={20} />
               </button>

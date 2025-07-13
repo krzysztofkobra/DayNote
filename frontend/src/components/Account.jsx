@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, StickyNote, Settings, User, Mail, Clock, Globe, LogOut, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2'
+
+const BASE_URL = 'http://localhost:8000'
 
 export default function AccountPage() {
   const [user, setUser] = useState({
@@ -14,6 +17,7 @@ export default function AccountPage() {
   const [selectedImage, setSelectedImage] = useState(null);
   const [previewUrl, setPreviewUrl] = useState("");
   const [loading, setLoading] = useState(true);
+  const [loadingUser, setLoadingUser] = useState(true)
   const navigate = useNavigate();
 
   const getCsrfToken = () => {
@@ -27,37 +31,52 @@ export default function AccountPage() {
     return '';
   };
 
-  useEffect(() => {
-    fetchUserData();
-  }, []);
+    useEffect(() => {
+      fetchUserData();
+    }, []);
 
   const fetchUserData = async () => {
-    try {
-      const response = await fetch('http://localhost:8000/api/accounts/profile/', {
-        method: 'GET',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      
-      if (response.ok) {
-        const userData = await response.json();
-        setUser({
-          username: userData.username,
-          email: userData.email,
-          avatar: userData.profile.avatar || 'https://via.placeholder.com/120',
-          dateJoined: userData.date_joined,
-          googleConnected: userData.profile.google_connected
-        });
-        setPreviewUrl(userData.profile.avatar || 'https://via.placeholder.com/120');
-      }
-    } catch (error) {
-      console.error('Error fetching user data:', error);
-    } finally {
-      setLoading(false);
+  setLoading(true);
+  try {
+    const response = await fetch('http://localhost:8000/api/accounts/profile/', {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (response.status === 401) {
+      navigate('/login', { replace: true });
+      return;
     }
-  };
+
+    if (response.ok) {
+      const userData = await response.json();
+      console.log(userData);
+      setUser({
+        username: userData.username,
+        email: userData.email,
+        avatar: userData.profile.avatar || 'https://via.placeholder.com/120',
+        dateJoined: userData.date_joined,
+        googleConnected: userData.profile.google_connected
+      });
+      setPreviewUrl(userData.profile.avatar || 'https://via.placeholder.com/120');
+    } else {
+      navigate('/login', { replace: true });
+    }
+  } catch (error) {
+    console.error('Error fetching user data:', error);
+    navigate('/login', { replace: true });
+  } finally {
+    setLoading(false);
+  }
+};
+
+   const showSwal = (icon, title) => {
+      Swal.fire({ icon, title, timer: 1600, showConfirmButton: false, toast: true, position: 'top-end' })
+    }
+
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -90,57 +109,93 @@ export default function AccountPage() {
       if (response.ok) {
         fetchUserData();
         setSelectedImage(null);
-        alert('Changes saved successfully!');
+        showSwal('success', 'Changes saved successfully!');
       } else {
-        alert('Error saving changes');
+        showSwal('error', 'Error saving changes');
       }
     } catch (error) {
       console.error('Error saving changes:', error);
-      alert('Error saving changes');
+      showSwal('error', 'Error saving changes');
     }
   };
 
   const handleDeleteAccount = async () => {
-    const confirmation = window.prompt('Type "DELETE" to confirm account deletion:');
-    
-    if (confirmation !== 'DELETE') {
-      if (confirmation !== null) {
-        alert('Please type DELETE to confirm account deletion.');
+  const { value: confirmation } = await Swal.fire({
+    title: 'Confirm Account Deletion',
+    text: 'Type DELETE to confirm account deletion.',
+    input: 'text',
+    inputPlaceholder: 'Type DELETE',
+    inputValidator: (value) => {
+      if (value !== 'DELETE') return 'You must type DELETE to confirm.'
+    },
+    showCancelButton: true,
+    confirmButtonText: 'Confirm',
+    cancelButtonText: 'Cancel'
+  });
+
+  if (confirmation !== 'DELETE') return;
+
+  let password = '';
+  if (!user.googleConnected) {
+    const { value: enteredPassword } = await Swal.fire({
+      title: 'Enter Your Password',
+      input: 'password',
+      inputPlaceholder: 'Your password',
+      inputAttributes: {
+        autocomplete: 'current-password'
+      },
+      showCancelButton: true,
+      confirmButtonText: 'Confirm',
+      cancelButtonText: 'Cancel',
+      inputValidator: (value) => {
+        if (!value) return 'Password is required';
       }
-      return;
-    }
+    });
 
-    let password = '';
-    if (!user.googleConnected) {
-      password = window.prompt('Please enter your password to confirm:');
-      if (!password) return;
-    }
+    if (!enteredPassword) return;
+    password = enteredPassword;
+  }
 
-    try {
-      const response = await fetch('api/accounts/delete/', {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          'X-CSRFToken': getCsrfToken(),
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          confirmation: 'DELETE',
-          password: password
-        }),
+  try {
+    const response = await fetch(`${BASE_URL}/api/accounts/delete/`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'X-CSRFToken': getCsrfToken(),
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        confirmation: 'DELETE',
+        password: password
+      }),
+    });
+
+    if (response.ok) {
+      await Swal.fire({
+        icon: 'success',
+        title: 'Account deleted',
+        timer: 1500,
+        showConfirmButton: false,
+        toast: true,
+        position: 'top-end'
       });
-
-      if (response.ok) {
-        window.location.href = '/login';
-      } else {
-        const errorData = await response.json();
-        alert(errorData.error || 'Error deleting account');
-      }
-    } catch (error) {
-      console.error('Error deleting account:', error);
-      alert('Error deleting account');
+      window.location.href = '/login';
+    } else {
+      const errorData = await response.json();
+      Swal.fire({
+        icon: 'error',
+        title: errorData.error || 'Error deleting account'
+      });
     }
-  };
+  } catch (error) {
+    console.error('Error deleting account:', error);
+    Swal.fire({
+      icon: 'error',
+      title: 'Unexpected error occurred while deleting the account.'
+    });
+  }
+};
+
 
   if (loading) {
     return (
@@ -159,7 +214,7 @@ export default function AccountPage() {
         <div className="p-4 border-b flex flex-col items-center space-y-2">
           <img
             src={user.avatar}
-            alt="User"
+            alt=""
             className="w-20 h-20 rounded-full object-cover"
             onError={e => { e.target.src = 'https://via.placeholder.com/80'; }}
           />
@@ -199,7 +254,7 @@ export default function AccountPage() {
               <div className="relative group">
                 <img
                   src={previewUrl}
-                  alt="Avatar"
+                  alt=""
                   className="w-32 h-32 rounded-full object-cover border-4 border-gray-100 shadow-lg group-hover:shadow-xl transition-shadow duration-300"
                   onError={e => { e.target.src = 'https://via.placeholder.com/120'; }}
                 />
