@@ -1,8 +1,10 @@
 import React from 'react';
 import { LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 export default function Logout() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const getCsrfToken = () => {
@@ -34,9 +36,9 @@ export default function Logout() {
       <div className="bg-white border border-gray-200 rounded-2xl shadow-md p-10 w-full max-w-md">
         <div className="flex flex-col items-center">
           <LogOut size={48} className="text-red-500 mb-4" />
-          <h2 className="text-2xl font-bold mb-2 text-gray-900">Log out</h2>
+          <h2 className="text-2xl font-bold mb-2 text-gray-900">{t('Log out')}</h2>
           <p className="text-gray-600 mb-8 text-center">
-            Are you sure you want to log out?
+            {t('Are you sure you want to log out?')}
           </p>
           <form className="w-full" onSubmit={handleLogout}>
             <button
@@ -44,13 +46,13 @@ export default function Logout() {
               className="w-full mb-3 flex items-center justify-center space-x-2 bg-red-600 hover:bg-red-700 text-white py-3 rounded-xl font-semibold transition-colors shadow-sm"
             >
               <LogOut size={20} />
-              <span>Logout</span>
+              <span>{t('Logout')}</span>
             </button>
             <a
               href="/account"
               className="block w-full text-center text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-xl py-3 font-semibold transition-colors"
             >
-              Cancel
+              {t('Cancel')}
             </a>
           </form>
         </div>

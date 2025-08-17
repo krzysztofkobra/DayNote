@@ -3,11 +3,13 @@ import '../styles/calendar.css'
 import React, { useState, useEffect, useRef } from 'react'
 import { Calendar, Settings, StickyNote, Grid, ChevronLeft, ChevronRight, RefreshCw, X, Trash2 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import Swal from 'sweetalert2'
 
 const BASE_URL = 'http://localhost:8000'
 
 const CalendarApp = () => {
+  const { t } = useTranslation()
   const [currentDate, setCurrentDate] = useState(new Date())
   const [view, setView] = useState(() => localStorage.getItem('calendarView') || 'month');
   const [timezone, setTimezone] = useState(() => localStorage.getItem("timezone") || "Europe/Warsaw");
@@ -31,9 +33,9 @@ const CalendarApp = () => {
   const navigate = useNavigate()
 
   const colors = [
-    { value: 'event-blue', label: 'Blue' },
-    { value: 'event-green', label: 'Green' },
-    { value: 'event-orange', label: 'Orange' }
+    { value: 'event-blue', label: t('Blue') },
+    { value: 'event-green', label: t('Green') },
+    { value: 'event-orange', label: t('Orange') }
   ]
 
   const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
@@ -159,10 +161,10 @@ const CalendarApp = () => {
         setEvents(formattedEvents)
         // showSwal('success', 'Events loaded')
       } else {
-        showSwal('error', 'Failed to load events')
+        showSwal('error', t('Failed to load events'))
       }
     } catch {
-      showSwal('error', 'Failed to load events')
+      showSwal('error', t('Failed to load events'))
     } finally {
       setLoading(false)
     }
@@ -205,13 +207,13 @@ const CalendarApp = () => {
     if (res.ok) {
       Swal.fire({
         icon: 'success',
-        title: `Event ${editingEvent ? 'updated' : 'added'}`
+        title: t(editingEvent ? 'Event updated' : 'Event added')
       })
       return await res.json()
     } else {
       Swal.fire({
         icon: 'error',
-        title: 'Failed to save event'
+        title: t('Failed to save event')
       })
       throw new Error('Failed to save event')
     }
@@ -236,12 +238,12 @@ const CalendarApp = () => {
       if (res.ok) {
         Swal.fire({
           icon: 'success',
-          title: 'Event deleted'
+          title: t('Event deleted')
         })
       } else {
         Swal.fire({
           icon: 'error',
-          title: 'Failed to delete event'
+          title: t('Failed to delete event')
         })
         throw new Error('Failed to delete event')
       }
@@ -385,8 +387,8 @@ const generateCalendarDays = () => {
     if (!validateTimes(eventForm.start_time, eventForm.end_time)) {
       Swal.fire({
         icon: 'error',
-        title: 'Invalid Time',
-        text: 'The start time cannot be later than or equal to the end time!'
+        title: t('Invalid Time'),
+        text: t('The start time cannot be later than or equal to the end time!')
       })
       return
     }
@@ -405,8 +407,8 @@ const generateCalendarDays = () => {
     } catch {
       Swal.fire({
         icon: 'error',
-        title: 'Error',
-        text: 'Failed to save event. Please try again.'
+        title: t('Error'),
+        text: t('Failed to save event. Please try again.')
       })
     } finally {
       setLoading(false)
@@ -415,12 +417,12 @@ const generateCalendarDays = () => {
 
   const deleteEvent = async eventId => {
   const result = await Swal.fire({
-    title: 'Are you sure?',
-    text: 'Do you really want to delete this event?',
+    title: t('Are you sure?'),
+    text: t('Do you really want to delete this event?'),
     icon: 'question',
     showCancelButton: true,
-    confirmButtonText: 'Yes, delete it',
-    cancelButtonText: 'Cancel'
+    confirmButtonText: t('Yes, delete it'),
+    cancelButtonText: t('Cancel')
   })
 
   if (result.isConfirmed) {
@@ -433,8 +435,8 @@ const generateCalendarDays = () => {
     } catch {
       Swal.fire({
         icon: 'error',
-        title: 'Error',
-        text: 'Failed to delete event. Please try again.'
+        title: t('Error'),
+        text: t('Failed to delete event. Please try again.')
       })
     } finally {
       setLoading(false)
@@ -568,7 +570,7 @@ const generateCalendarDays = () => {
 
               <div className="flex flex-col space-y-1 overflow-hidden flex-grow max-h-48">
                 {day.events.length === 0 && (
-                  <div className="text-xs text-gray-400 italic select-none">No events</div>
+                  <div className="text-xs text-gray-400 italic select-none">{t('No events')}</div>
                 )}
 
                 {day.events.map(event => (
@@ -772,21 +774,21 @@ const renderDayView = () => {
             <div className="space-y-2">
               <a href="/" className="flex items-center space-x-3 p-3 text-blue-600 bg-blue-50 font-semibold rounded-lg transition-colors">
                 <Calendar size={20} />
-                <span>Calendar</span>
+                <span>{t('Calendar')}</span>
               </a>
               <a
                 href="/notes"
                 className="flex items-center space-x-3 p-3 text-gray-600 hover:bg-gray-100 rounded-lg"
               >
                 <StickyNote size={20} />
-                <span>Notes</span>
+                <span>{t('Notes')}</span>
               </a>
             </div>
           </nav>
           <div className="p-4 border-t">
             <a href="/settings" className="flex items-center space-x-3 p-3 text-gray-600 hover:bg-gray-100 rounded-lg">
               <Settings size={20} />
-              <span>Settings</span>
+              <span>{t('Settings')}</span>
             </a>
           </div>
         </div>
@@ -804,9 +806,9 @@ const renderDayView = () => {
                   onChange={e => setView(e.target.value)}
                   className="border border-gray-300 rounded px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-gray-500 hover:bg-gray-100"
                 >
-                  <option value="month">Month</option>
-                  <option value="week">Week</option>
-                  <option value="day">Day</option>
+                  <option value="month">{t('Month')}</option>
+                  <option value="week">{t('Week')}</option>
+                  <option value="day">{t('Day')}</option>
                 </select>
               </div>
               <div className="flex items-center space-x-2">
@@ -817,7 +819,7 @@ const renderDayView = () => {
                   onClick={goToToday}
                   className="px-3 py-1.5 bg-blue-500 text-white rounded text-sm hover:bg-blue-600"
                 >
-                  Today
+                  {t('Today')}
                 </button>
                 <button onClick={() => navigateMonth(1)} className="p-2 hover:bg-blue-600 rounded-lg">
                   <ChevronRight size={16} />
@@ -876,7 +878,7 @@ const renderDayView = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Start Time</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('Start Time')}</label>
                 <input
                   type="time"
                   value={eventForm.start_time}
@@ -887,7 +889,7 @@ const renderDayView = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">End Time</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('End Time')}</label>
                 <input
                   type="time"
                   value={eventForm.end_time}
@@ -921,7 +923,7 @@ const renderDayView = () => {
                     disabled={loading}
                   >
                     <Trash2 size={16} />
-                    <span>Delete</span>
+                    <span>{t('Delete')}</span>
                   </button>
                 )}
                 <div className="flex space-x-2 ml-auto">
@@ -939,7 +941,7 @@ const renderDayView = () => {
                     disabled={loading}
                   >
                     {loading && <RefreshCw size={16} className="animate-spin" />}
-                    <span>Save</span>
+                    <span>{t('Save')}</span>
                   </button>
                 </div>
               </div>
@@ -952,7 +954,7 @@ const renderDayView = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-96 max-w-md mx-4">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold">All Events</h2>
+              <h2 className="text-lg font-semibold">{t('All Events')}</h2>
               <button
                 onClick={() => setShowMoreEventsModal(false)}
                 className="text-gray-400 hover:text-gray-600"

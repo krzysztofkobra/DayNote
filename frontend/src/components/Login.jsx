@@ -1,8 +1,10 @@
 import 'bootstrap/dist/css/bootstrap.min.css'
 import '../styles/acc_styles.css'
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 
 export default function Login() {
+  const { t } = useTranslation();
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState(null)
@@ -82,23 +84,23 @@ export default function Login() {
     <div className="login-bg">
       <div className="d-flex align-items-center justify-content-center min-vh-100">
         <div className="glassmorph p-5 rounded-4 shadow-lg" style={{maxWidth: 410, width: "100%"}}>
-          <h2 className="mb-4 text-center fw-semibold" style={{letterSpacing:1}}>Sign in</h2>
+          <h2 className="mb-4 text-center fw-semibold" style={{letterSpacing:1}}>{t('Sign in')}</h2>
           <form onSubmit={handleSubmit}>
             <div className="mb-3">
-              <label htmlFor="username" className="form-label">Username</label>
+              <label htmlFor="username" className="form-label">{t('Username')}</label>
               <input type="text" id="username" name="username" className="form-control"
                 value={username} onChange={e => setUsername(e.target.value)} required autoFocus />
             </div>
             <div className="mb-3">
-              <label htmlFor="password" className="form-label">Password</label>
+              <label htmlFor="password" className="form-label">{t('Password')}</label>
               <input type="password" id="password" name="password" className="form-control"
                 value={password} onChange={e => setPassword(e.target.value)} required />
             </div>
-            <button type="submit" className="btn btn-primary w-100 mb-3 fw-semibold">Login</button>
+            <button type="submit" className="btn btn-primary w-100 mb-3 fw-semibold">{t('Login')}</button>
             <div className="w-100 mb-2" id="g_id_signin"></div>
           </form>
           {error && <p className="text-danger mt-3">{error}</p>}
-          <p className="mt-3 text-center text-secondary">Don't have an account? <a href="/register">Register here</a></p>
+          <p className="mt-3 text-center text-secondary">{t("Don't have an account?")} <a href="/register">{t('Register here')}</a></p>
         </div>
       </div>
     </div>

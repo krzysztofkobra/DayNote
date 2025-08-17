@@ -164,7 +164,7 @@ export default function SettingsPage() {
               </select>
             </div>
 
-            <div>
+            {/* <div>
               <label className="block mb-3 font-medium text-gray-800 flex items-center space-x-2">
                 <CalendarDays size={20} /> <span>{t("Week System")}</span>
               </label>
@@ -178,7 +178,7 @@ export default function SettingsPage() {
                   className={`hover:text-white px-6 py-2 rounded-xl font-semibold ${weekLayout === "mon" ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-700"}`}
                 >{t("MON–SUN")}</button>
               </div>
-            </div>
+            </div> */}
 
             <div>
               <label className="block mb-3 font-medium text-gray-800 flex items-center space-x-2">
@@ -200,7 +200,7 @@ export default function SettingsPage() {
               </div>
             </div>
 
-            <div>
+            {/* <div>
               <label className="block mb-3 font-medium text-gray-800 flex items-center space-x-2">
                 <Sun size={20} /><span>{t("Theme")}</span>
               </label>
@@ -214,7 +214,7 @@ export default function SettingsPage() {
                   className={`hover:text-white flex items-center px-5 py-2 rounded-full font-semibold ${theme === "dark" ? "bg-blue-800 text-white" : "bg-gray-100 text-gray-700"}`}
                 ><Moon size={18} className="mr-2" /> {t("Dark")}</button>
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>

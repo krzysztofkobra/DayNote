@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, StickyNote, Settings, User, Mail, Clock, Globe, LogOut, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import Swal from 'sweetalert2'
 
 const BASE_URL = 'http://localhost:8000'
 
 export default function AccountPage() {
+  const { t } = useTranslation();
   const [user, setUser] = useState({
     username: "",
     email: "",
@@ -109,28 +111,28 @@ export default function AccountPage() {
       if (response.ok) {
         fetchUserData();
         setSelectedImage(null);
-        showSwal('success', 'Changes saved successfully!');
+        showSwal('success', t('Changes saved successfully!'));
       } else {
-        showSwal('error', 'Error saving changes');
+        showSwal('error', t('Error saving changes'));
       }
     } catch (error) {
       console.error('Error saving changes:', error);
-      showSwal('error', 'Error saving changes');
+      showSwal('error', t('Error saving changes'));
     }
   };
 
   const handleDeleteAccount = async () => {
   const { value: confirmation } = await Swal.fire({
-    title: 'Confirm Account Deletion',
-    text: 'Type DELETE to confirm account deletion.',
+    title: t('Confirm Account Deletion'),
+    text: t('Type DELETE to confirm account deletion.'),
     input: 'text',
-    inputPlaceholder: 'Type DELETE',
+    inputPlaceholder: t('Type DELETE'),
     inputValidator: (value) => {
-      if (value !== 'DELETE') return 'You must type DELETE to confirm.'
+      if (value !== 'DELETE') return t('You must type DELETE to confirm.')
     },
     showCancelButton: true,
-    confirmButtonText: 'Confirm',
-    cancelButtonText: 'Cancel'
+    confirmButtonText: t('Confirm'),
+    cancelButtonText: t('Cancel')
   });
 
   if (confirmation !== 'DELETE') return;
@@ -138,17 +140,17 @@ export default function AccountPage() {
   let password = '';
   if (!user.googleConnected) {
     const { value: enteredPassword } = await Swal.fire({
-      title: 'Enter Your Password',
+      title: t('Enter Your Password'),
       input: 'password',
-      inputPlaceholder: 'Your password',
+      inputPlaceholder: t('Your password'),
       inputAttributes: {
         autocomplete: 'current-password'
       },
       showCancelButton: true,
-      confirmButtonText: 'Confirm',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: t('Confirm'),
+      cancelButtonText: t('Cancel'),
       inputValidator: (value) => {
-        if (!value) return 'Password is required';
+        if (!value) return t('Password is required');
       }
     });
 
@@ -173,7 +175,7 @@ export default function AccountPage() {
     if (response.ok) {
       await Swal.fire({
         icon: 'success',
-        title: 'Account deleted',
+        title: t('Account deleted'),
         timer: 1500,
         showConfirmButton: false,
         toast: true,
@@ -184,14 +186,14 @@ export default function AccountPage() {
       const errorData = await response.json();
       Swal.fire({
         icon: 'error',
-        title: errorData.error || 'Error deleting account'
+        title: errorData.error || t('Error deleting account')
       });
     }
   } catch (error) {
     console.error('Error deleting account:', error);
     Swal.fire({
       icon: 'error',
-      title: 'Unexpected error occurred while deleting the account.'
+      title: t('Unexpected error occurred while deleting the account.')
     });
   }
 };
@@ -202,7 +204,7 @@ export default function AccountPage() {
       <div className="flex h-screen bg-gray-50 items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
+          <p className="text-gray-600">{t('Loading...')}</p>
         </div>
       </div>
     );
@@ -226,18 +228,18 @@ export default function AccountPage() {
           <div className="space-y-2">
             <a href="/" className="flex items-center space-x-3 p-3 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
               <Calendar size={20} />
-              <span>Calendar</span>
+              <span>{t('Calendar')}</span>
             </a>
             <a href="/notes" className="flex items-center space-x-3 p-3 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
               <StickyNote size={20} />
-              <span>Notes</span>
+              <span>{t('Notes')}</span>
             </a>
           </div>
         </nav>
         <div className="p-4 border-t">
           <a href="/settings" className="flex items-center space-x-3 p-3 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
             <Settings size={20} />
-            <span>Settings</span>
+            <span>{t('Settings')}</span>
           </a>
         </div>
       </div>
@@ -245,8 +247,8 @@ export default function AccountPage() {
       <div className="flex-1 overflow-auto">
         <div className="max-w-4xl mx-auto p-8">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">My Account</h1>
-            <p className="text-gray-600">Manage your account settings and preferences</p>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">{t('My Account')}</h1>
+            <p className="text-gray-600">{t('Manage your account settings and preferences')}</p>
           </div>
 
           <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-6">
@@ -272,7 +274,7 @@ export default function AccountPage() {
                   className="hidden"
                 />
               </div>
-              <p className="text-sm text-gray-500 mt-4">Click on the avatar to change your profile picture</p>
+              <p className="text-sm text-gray-500 mt-4">{t('Click on the avatar to change your profile picture')}</p>
             </div>
 
             <div className="flex justify-center">
@@ -285,13 +287,13 @@ export default function AccountPage() {
                     : 'bg-gray-200 text-gray-500 cursor-not-allowed'
                 }`}
               >
-                Save Changes
+                {t('Save Changes')}
               </button>
             </div>
           </div>
 
           <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">Account Information</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-6">{t('Account Information')}</h2>
             <div className="space-y-6">
               <div className="flex items-center justify-between py-3 border-b border-gray-100">
                 <div className="flex items-center space-x-3">
@@ -299,8 +301,8 @@ export default function AccountPage() {
                     <User size={18} className="text-gray-600" />
                   </div>
                   <div>
-                    <p className="font-medium text-gray-900">Username</p>
-                    <p className="text-sm text-gray-500">Your unique identifier</p>
+                    <p className="font-medium text-gray-900">{t('Username')}</p>
+                    <p className="text-sm text-gray-500">{t('Your unique identifier')}</p>
                   </div>
                 </div>
                 <p className="text-gray-900 font-medium">{user.username}</p>
@@ -312,11 +314,11 @@ export default function AccountPage() {
                     <Mail size={18} className="text-gray-600" />
                   </div>
                   <div>
-                    <p className="font-medium text-gray-900">Email</p>
-                    <p className="text-sm text-gray-500">Your contact email</p>
+                    <p className="font-medium text-gray-900">{t('Email')}</p>
+                    <p className="text-sm text-gray-500">{t('Your contact email')}</p>
                   </div>
                 </div>
-                <p className="text-gray-900 font-medium">{user.email || "Not provided"}</p>
+                <p className="text-gray-900 font-medium">{user.email || t("Not provided")}</p>
               </div>
 
               <div className="flex items-center justify-between py-3 border-b border-gray-100">
@@ -325,8 +327,8 @@ export default function AccountPage() {
                     <Clock size={18} className="text-gray-600" />
                   </div>
                   <div>
-                    <p className="font-medium text-gray-900">Joined</p>
-                    <p className="text-sm text-gray-500">Member since</p>
+                    <p className="font-medium text-gray-900">{t('Joined')}</p>
+                    <p className="text-sm text-gray-500">{t('Member since')}</p>
                   </div>
                 </div>
                 <p className="text-gray-900 font-medium">{user.dateJoined}</p>
@@ -338,20 +340,20 @@ export default function AccountPage() {
                     <Globe size={18} className="text-gray-600" />
                   </div>
                   <div>
-                    <p className="font-medium text-gray-900">Google</p>
-                    <p className="text-sm text-gray-500">Account integration</p>
+                    <p className="font-medium text-gray-900">{t('Google')}</p>
+                    <p className="text-sm text-gray-500">{t('Account integration')}</p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
                   {user.googleConnected ? (
                     <>
                       <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                      <span className="text-green-600 font-medium">Connected</span>
+                      <span className="text-green-600 font-medium">{t('Connected')}</span>
                     </>
                   ) : (
                     <>
                       <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
-                      <span className="text-gray-600 font-medium">Not connected</span>
+                      <span className="text-gray-600 font-medium">{t('Not connected')}</span>
                     </>
                   )}
                 </div>
@@ -365,7 +367,7 @@ export default function AccountPage() {
               className="w-full bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 py-4 rounded-2xl font-semibold transition-colors duration-200 flex items-center justify-center space-x-2"
             >
               <LogOut size={20} />
-              <span>Logout</span>
+              <span>{t('Logout')}</span>
             </button>
             
             <button 
@@ -373,7 +375,7 @@ export default function AccountPage() {
               className="w-full bg-red-600 hover:bg-red-700 text-white py-4 rounded-2xl font-semibold transition-colors duration-200 flex items-center justify-center space-x-2"
             >
               <Trash2 size={20} />
-              <span>Delete Account</span>
+              <span>{t('Delete Account')}</span>
             </button>
           </div>
         </div>
